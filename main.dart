@@ -110,39 +110,46 @@ class _Homepagestate extends State<Homepage>{
                         fontWeight: FontWeight.bold
                         ),),),
                         
-                      const SizedBox(width: 20,),
+                      const SizedBox(width: 10),
                 
-                       ElevatedButton(
-                        onPressed: () => {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00FF00),
-                          foregroundColor: Colors.white,),
-                        child: Text(
-                          'Filter',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                       Container(
+                        margin: EdgeInsets.only(top: 20),
+                         child: ElevatedButton(
+                          onPressed: () => {},
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                            backgroundColor: Color.fromARGB(255, 22, 27, 34),
+                            foregroundColor: Colors.white,),
+                          child: Text(
+                            'Filter',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),),
+                       ),
+                
+                      const SizedBox(width: 10,),
+                
+                       Container(
+                        margin: EdgeInsets.only(top: 20),
+                         child: ElevatedButton(
+                          onPressed: () => {},
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                            backgroundColor: Color.fromARGB(255, 22, 27, 34),
+                            foregroundColor: Colors.white,),
+                          child: Text(
+                            'Category',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
-                      ),
-                
-                      const SizedBox(width: 20,),
-                
-                       ElevatedButton(
-                        onPressed: () => {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00FF00),
-                          foregroundColor: Colors.white,),
-                        child: Text(
-                          'Category',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
+                       ),
                         ],),
               ),
               
