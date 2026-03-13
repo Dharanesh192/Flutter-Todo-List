@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:to_do_list/widget.dart';
 
 class Addtask extends StatefulWidget {
   const Addtask({super.key});
@@ -8,10 +9,23 @@ class Addtask extends StatefulWidget {
 }
 
 class _AddtaskState extends State<Addtask> {
+
+  TextEditingController task = TextEditingController();
+  String defaultPriority = "Medium"; 
+  TextEditingController category = TextEditingController();
   TextEditingController date = TextEditingController();
   FocusNode dateFocus = FocusNode();
   @override
   Widget build(BuildContext context) {
+
+    void display (){
+      print(task.text);
+      print(defaultPriority);
+      print(category.text);
+      print(date.text);
+    }
+
+
     return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -43,7 +57,7 @@ class _AddtaskState extends State<Addtask> {
 
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
+                child: const Text(
                   "Task name",
                   style: TextStyle(
                     fontSize: 16,
@@ -54,76 +68,74 @@ class _AddtaskState extends State<Addtask> {
 
               const SizedBox(height: 5),
 
-              TextField(
-                style: const TextStyle(color: Colors.white54),
-                decoration: InputDecoration(
-                  hintText: "Enter your task",
-                  hintStyle: const TextStyle(color: Colors.white54),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.white54),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Color(0xFF00FF00)),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
+              Textstyler(controller: task, hint: "Enter your task"),
 
               const SizedBox(height: 20),
 
-              
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                    Expanded(
-                      child : Column(
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                      Expanded(
+                        child : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Priority",style: TextStyle(color: Colors.white54),),
+                                Theme(
+                                  data: Theme.of(context).copyWith(
+                                    splashColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                  ),
+                                  child: DropdownButtonFormField<String>(
+                                    isExpanded: true,
+                                    initialValue: defaultPriority,
+                                    dropdownColor: const Color.fromARGB(255, 22, 27, 34),
+                                    borderRadius: BorderRadius.circular(10),
+                                    style: const TextStyle(color: Colors.white54),
+                                  
+                                    decoration: InputDecoration(
+                                      hintText: "Eg: High, Medium, Low",
+                                      hintStyle: const TextStyle(color: Colors.white54),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(color: Colors.white54),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(color: Color(0xFF00FF00)),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  
+                                    items: ["High", "Medium", "Low"].map((value) {
+                                      return DropdownMenuItem(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                  
+                                    onChanged: (value) {
+                                      setState(() {
+                                        defaultPriority = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                    ],),),
+
+                      const SizedBox(width: 10),
+                      
+                      Expanded(
+                        child: Column(
                           children: [
                             Align(
                               alignment: Alignment.centerLeft,
-                              child: Text("Priority",style: const TextStyle(color: Colors.white54),)),
-                            TextField(
-                              style: const TextStyle(color: Colors.white54),
-                              decoration: InputDecoration(
-                                hintText: "Eg: High, Medium, Low",
-                                hintStyle: const TextStyle(color: Colors.white54),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(color: Colors.white54),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(color: Color(0xFF00FF00)),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),),],),),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text("Category", style: const TextStyle(color: Colors.white54)),
-                          ),
-                          TextField(
-                            style: const TextStyle(color: Colors.white54),
-                            decoration: InputDecoration(
-                              hintText: "Eg: Work, Personal",
-                              hintStyle: const TextStyle(color: Colors.white54),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.white54),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Color(0xFF00FF00)),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                              child: const Text("Category", style: TextStyle(color: Colors.white54)),
                             ),
-                          ),
-                        ],
+                            Textstyler(controller: category, hint: "Enter your category"),
+                          ],
+                        ),
                       ),
-                    ),
-                ],
-              ),
+                  ],
+                ),
 
               const SizedBox(height: 20),
 
@@ -131,7 +143,7 @@ class _AddtaskState extends State<Addtask> {
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
+                    child: const Text(
                       "Deadline",
                       style: TextStyle(
                         fontSize: 16,
@@ -143,7 +155,7 @@ class _AddtaskState extends State<Addtask> {
                     readOnly: true,
                     focusNode: dateFocus,
                     showCursor: false,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white54),
                     decoration: InputDecoration(
                       hintText: "Select date",
                       hintStyle: const TextStyle(color: Colors.white54),
@@ -173,7 +185,13 @@ class _AddtaskState extends State<Addtask> {
                                 onSurface: Colors.white,
                               ),
                             ),
-                            child: child!,
+                            child: Center(
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                height: 550,
+                                child: child,
+                              ),
+                            ),
                           );
                         },
                       );
@@ -188,7 +206,7 @@ class _AddtaskState extends State<Addtask> {
               const SizedBox(height: 20),
 
               ElevatedButton(
-                onPressed: () {Navigator.pop(context);},
+                onPressed: () {display();Navigator.pop(context);},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00FF00),
                   shape: RoundedRectangleBorder(

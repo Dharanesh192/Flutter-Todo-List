@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:to_do_list/Container.dart';
 import 'add.dart';
-void main(){
+void main() {
   runApp(const Homepage());
 }
 
@@ -82,28 +83,71 @@ class _Homepagestate extends State<Homepage>{
           color: const Color.fromARGB(255, 13, 17, 23),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                  width: 400,
-                  margin: EdgeInsets.only(top: 20),
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 22, 27, 34),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: TextField(
-                    controller: input,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon( Icons.search, color: Color.fromARGB(255, 117, 117, 115)),
-                      hintText: 'Search bar',
-                      hintStyle: TextStyle(color: Color.fromARGB(255, 117, 117, 115), fontSize: 20, fontWeight: FontWeight.bold),
-                      border: InputBorder.none,
-                ),style: TextStyle(color: Color.fromARGB(255, 117, 117, 115),fontSize: 20, fontWeight: FontWeight.bold),
-                ),),
-                ],
-              )
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    margin: EdgeInsets.only(top: 20),
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 22, 27, 34),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      controller: input,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon( Icons.search, color: Color.fromARGB(255, 117, 117, 115)),
+                        hintText: 'Search bar',
+                        hintStyle: TextStyle(color: Color.fromARGB(255, 117, 117, 115), fontSize: 20, fontWeight: FontWeight.bold),
+                        border: InputBorder.none,
+                      ),
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 117, 117, 115),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold
+                        ),),),
+                        
+                      const SizedBox(width: 20,),
+                
+                       ElevatedButton(
+                        onPressed: () => {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00FF00),
+                          foregroundColor: Colors.white,),
+                        child: Text(
+                          'Filter',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                
+                      const SizedBox(width: 20,),
+                
+                       ElevatedButton(
+                        onPressed: () => {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00FF00),
+                          foregroundColor: Colors.white,),
+                        child: Text(
+                          'Category',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                        ],),
+              ),
+              
+              Taskview()
+
               ],
           ),
         ),
