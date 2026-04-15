@@ -1,0 +1,262 @@
+// Need to fix the dispaly task issue when switching between search by name and category with a seacrh value
+import 'package:flutter/material.dart';
+import 'package:to_do_list/repository/task_repository.dart';
+import 'package:to_do_list/models/task_model.dart';
+import 'package:to_do_list/Screen/edit_screen.dart';
+import 'widget.dart';
+import 'dart:async';
+
+class Taskview extends StatefulWidget {
+  const Taskview({super.key});
+
+  @override
+  TaskviewState createState() => TaskviewState();
+}
+
+class TaskviewState extends State<Taskview>{
+
+  final _table = TaskRepository();
+  int taskcount = 0;
+  List<TaskModel> tasks = [];
+  List<TaskModel> filtertask = [];
+  DateTime currentDate = DateTime.now();
+  late Timer _timer;
+  String selectedFilter = 'All';
+  String searchKeyword = '';
+  bool category = false;
+
+  Future<void> taskdata() async {
+    final value = await _table.getTaskCount();
+    tasks = await _table.getAllTasks();
+    setState(() {
+      taskcount = value;
+      filtertask = tasks;
+      search(selectedFilter, searchKeyword, category);
+    });
+  }
+
+  void search(String filter,String keyword,bool iscategory){
+    selectedFilter = filter;
+    searchKeyword = keyword;
+    category = iscategory;
+    _filter(selectedFilter,searchKeyword,category);
+  }
+
+  void _filter(String filter,String keyword,bool iscategory){
+    setState((){
+      var temp = tasks;
+      if(filter == 'All'){
+        temp = tasks; // If the filter is 'All', show all tasks
+      }
+      else if(filter == 'Completed'){
+        temp = tasks.where((task) => task.isComplete).toList(); // Show only completed tasks
+      }
+      else if(filter == 'Pending'){
+        temp = tasks.where((task) => !task.isComplete).toList(); // Show only incomplete tasks
+      }
+      else if(filter == 'High'){
+        temp = tasks.where((task) => task.priority == 'High').toList(); // Show only high-priority tasks
+      }
+      else if(filter == 'Medium'){
+        temp = tasks.where((task) => task.priority == 'Medium').toList(); // Show only Medium priority tasks
+      }
+      else if(filter == 'Low'){
+        temp = tasks.where((task) => task.priority == 'Low').toList(); // Show only Low priority tasks
+      }
+        if(iscategory){
+          temp = temp.where((task) => task.category!=null ? task.category!.toLowerCase().contains(keyword.toLowerCase()) : false).toList();
+        }
+        else{
+          temp = temp.where((task) => task.taskName.toLowerCase().contains(keyword.toLowerCase())).toList();
+        }
+      filtertask = temp;
+    });
+  }
+
+  void _midnighttimer() {
+    final now = DateTime.now();
+    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    final durationUntilMidnight = nextMidnight.difference(now);
+
+    _timer = Timer(durationUntilMidnight, () {
+      setState(() {
+        currentDate = DateTime.now(); // Update the current date at midnight
+      });
+      _midnighttimer(); // Reschedule the timer for the next midnight
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    taskdata();
+    _midnighttimer(); // Start the midnight timer
+    currentDate = DateTime.now(); // Initialize currentDate with the current date
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+                margin: EdgeInsets.only(top: 20,bottom: 20),
+                width: MediaQuery.of(context).size.width > 500 ? MediaQuery.of(context).size.width * 0.9 :MediaQuery.of(context).size.width > 450 ? MediaQuery.of(context).size.width * 0.93 : MediaQuery.of(context).size.width * 0.95,
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 22, 27, 34),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  children: [
+                        const SizedBox(height: 5),
+                         Expanded(
+                           child: ListView.builder(
+                              itemCount: filtertask.length, // Use the task count from the state
+                              itemBuilder: (context, index) {
+                                        return Container(
+                                          height: MediaQuery.of(context).size.width > 620 ? 100 : MediaQuery.of(context).size.width > 500 ? 120 : MediaQuery.of(context).size.width > 450 ? 140 :  180,
+                                          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(10),
+                                            border: Border.all(color: filtertask[index].deadline == null ? Colors.grey 
+                                            : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? Colors.green 
+                                            : Colors.red,
+                                            width: MediaQuery.of(context).size.width > 620 ? 2 : 1.5),
+                                            color: const Color.fromARGB(255, 13, 17, 23),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                            child: Row(
+                                              children: [
+                                               IconButton(
+                                                 icon: Icon(filtertask[index].isComplete ? Icons.task_alt : Icons.circle_outlined),
+                                                 color: Colors.green,
+                                                 onPressed: () async {
+                                                  setState(() {
+                                                    filtertask[index].isComplete = !filtertask[index].isComplete; 
+                                                  });
+                                                   await _table.completeTask(TaskModel(taskId:  filtertask[index].taskId,
+                                                    taskName: filtertask[index].taskName,
+                                                    priority: filtertask[index].priority,
+                                                    createdAt: filtertask[index].createdAt,
+                                                    updatedAt: filtertask[index].updatedAt,
+                                                    deadline: filtertask[index].deadline,
+                                                    category: filtertask[index].category,
+                                                    isComplete: filtertask[index].isComplete,
+                                                    isSynced: filtertask[index].isSynced,
+                                                    userId: filtertask[index].userId,  ));
+                                                    if(filtertask[index].isSynced==false) await Future.delayed(const Duration(milliseconds: 300));
+                                                    taskdata();
+                                                  },
+                                               ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        filtertask[index].taskName, // Use the task title from the list
+                                                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                                      ),
+                                                      const SizedBox(height: 5),
+                                                      TaskSubtitle(
+                                                        category: filtertask[index].category, // Use the task category from the list
+                                                        deadline: filtertask[index].deadline, // Use the task deadline from the list
+                                                        datecolor : filtertask[index].deadline == null ? true : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? true : false
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: const EdgeInsets.all(10),
+                                                  margin: const EdgeInsets.only(right: 20),
+                                                  decoration: BoxDecoration(
+                                                    color: filtertask[index].priority == 'High' ? Colors.red
+                                                    : filtertask[index].priority == 'Medium' ? Colors.orange 
+                                                    : Colors.green,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                                Theme(
+                                                    data: Theme.of(context).copyWith(
+                                                      splashColor: Colors.transparent,
+                                                      highlightColor: Color(0x26FFFFFF)),
+                                                      child: PopupMenuButton<String>(
+                                                        color: const Color.fromARGB(255, 22, 27, 34),
+                                                        icon: Icon(Icons.more_vert, color: Colors.white), // 3 dots icon
+                                                        shape: RoundedRectangleBorder(
+                                                          side: BorderSide(color: Colors.white, width: 2),
+                                                          borderRadius: BorderRadius.circular(10),
+                                                        ),
+                                                      
+                                                        itemBuilder: (context) => [
+                                                          PopupMenuItem(
+                                                            value: 'edit',
+                                                            child: Row(
+                                                              children: [
+                                                                Icon(Icons.edit, color: Colors.blue[300]),
+                                                                SizedBox(width: 10),
+                                                                Text('Edit',style: TextStyle(color: Colors.white),),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          PopupMenuItem(
+                                                            value: 'delete',
+                                                            child: Row(
+                                                              children: [
+                                                                Icon(Icons.delete, color: Colors.red),
+                                                                SizedBox(width: 10),
+                                                                Text('Delete',style: TextStyle(color: Colors.white),),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      
+                                                       onSelected: (value) async {
+                                                            if (value == 'edit') {
+                                                              final edited = await showModalBottomSheet(
+                                                                context: context,
+                                                                isScrollControlled: true,
+                                                                backgroundColor: Colors.transparent,
+                                                                builder: (context) => Center(
+                                                                  child:SizedBox(
+                                                                    width: (MediaQuery.of(context).size.width * 0.75).clamp(100, 475),
+                                                                    height: 420,
+                                                                    child: Edittask(
+                                                                    currenttask:filtertask[index].taskName,
+                                                                    currentpriority: filtertask[index].priority,
+                                                                    currentcategory: filtertask[index].category,
+                                                                    currentdeadline: filtertask[index].deadline,
+                                                                    created: filtertask[index].createdAt,
+                                                                    taskId: filtertask[index].taskId,
+                                                                    completion: filtertask[index].isComplete,
+                                                                  ),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                              if(edited == true){
+                                                                taskdata(); // Refresh the task list after editing
+                                                              }
+                                                            }
+                                                            else if (value == 'delete') {
+                                                                await _table.deleteTask(filtertask[index].taskId);
+                                                                setState(() {
+                                                                filtertask.removeAt(index); // Remove the task from the list
+                                                                taskcount--; // Decrease the task count
+                                                              });
+                                                          }
+                                                        },
+                                                      ),
+                                                    ),],  
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  ],));}}                
