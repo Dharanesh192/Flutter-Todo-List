@@ -249,17 +249,15 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
         body: Container(
             width: double.infinity,
             height: double.infinity,
-            color: const Color.fromARGB(255, 13, 17, 23),
+            color: const Color.fromRGBO(13, 17, 23, 1),
             child: Column(
               children: [
-                SizedBox(
-                  width: (MediaQuery.of(context).size.width * 0.8).clamp(350, 800),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
+                LayoutBuilder (
+                      builder: (context, constraints) {
+                        final isNarrow = constraints.maxWidth < 600;
+                        final searchbox = Expanded(
                           child: Container(
-                            margin: EdgeInsets.only(top: 20),
+                            margin: EdgeInsets.only(top: 20, bottom: 0),
                             padding: EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
                               color: Color.fromARGB(255, 22, 27, 34),
@@ -270,12 +268,9 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                             onChanged: (value) {
                               keyword = value; // Update the search keyword whenever the user types in the search bar
                               _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '', iscategory);
-                              setState(() {
-                                inputdata;
-                              });
                               },
                             decoration: InputDecoration(
-                              prefixIcon: inputdata.text.isEmpty ? Icon( Icons.search, color: Colors.white54) : null,
+                              prefixIcon: Icon( Icons.search, color: Colors.white54),
                               hintText: 'Search bar',
                               hintStyle: TextStyle(color: Color.fromARGB(255, 117, 117, 115), fontWeight: FontWeight.w700, fontSize: 20,),
                               border: InputBorder.none,
@@ -285,103 +280,128 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                               fontWeight: FontWeight.bold,
                               fontSize: 20
                               ),),),
-                        ),
+                          );
+                                                      
+                        final filter = Row(
+                          mainAxisSize: MainAxisSize.min,
+                             children: [
+                               Container(
+                                width: 125,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: Color.fromARGB(255, 22, 27, 34), // Highlight if a filter is active
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                 child: Theme(
+                                    data: Theme.of(context).copyWith(
+                                      splashColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                    ),
+                                   child: PopupMenuButton<String>(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      side: BorderSide(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    tooltip: '',
+                                    splashRadius: null,
+                                    color: Color.fromARGB(255, 22, 27, 34),
+                                    itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: 'All',
+                                      child: Text('Clear Filter',style: TextStyle(color: Colors.white54)),),
+                                    const PopupMenuItem(
+                                      value: 'High',
+                                      child: Text('High Priority',style: TextStyle(color: Colors.white54)),),
+                                    const PopupMenuItem(
+                                      value: 'Medium',
+                                      child: Text('Medium Priority',style: TextStyle(color: Colors.white54))),
+                                    const PopupMenuItem(
+                                      value: 'Low',
+                                      child: Text('Low Priority',style: TextStyle(color: Colors.white54))),
+                                    const PopupMenuItem(
+                                      value: 'Pending',
+                                      child: Text('Pending',style: TextStyle(color: Colors.white54))),
+                                    const PopupMenuItem(
+                                      value: 'Completed',
+                                      child: Text('Completed',style: TextStyle(color: Colors.white54))),
+                                    ],
+                                    onSelected: (value) {
+                                      setState(() {
+                                        activeFilter = activeFilter == value ? null : value; // toggle off if same
+                                        keyword = ''; // Clear the search keyword when a filter is selected
+                                        inputdata.clear(); // Clear the search bar when a filter is selected
+                                        _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '',iscategory); // Call the filter function in TaskviewState to filter the task list based on the selected priority
+                                      });
+                                    },
+                                                       
+                                      child: Center(
+                                        child: Text(activeFilter != null ? activeFilter == 'All' ? 'Filter By' : activeFilter! : 'Filter By',
+                                        style: TextStyle(color: Colors.white54, 
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),),
+                                      ),
+                                    
+                                    ),
+                                 )),
                             
-                          const SizedBox(width: 10,),
-                          
-                           Container(
-                            width: 125,
-                            height: 48,
-                            margin: EdgeInsets.only(top: 20),
-                            decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 22, 27, 34), // Highlight if a filter is active
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                             child: Theme(
-                                data: Theme.of(context).copyWith(
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                ),
-                               child: PopupMenuButton<String>(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: BorderSide(
-                                    color: Colors.white,
-                                    width: 2,
-                                  ),
-                                ),
-                                tooltip: '',
-                                splashRadius: null,
-                                color: Color.fromARGB(255, 22, 27, 34),
-                                itemBuilder: (context) => [
-                                const PopupMenuItem(
-                                  value: 'All',
-                                  child: Text('Clear Filter',style: TextStyle(color: Colors.white54)),),
-                                const PopupMenuItem(
-                                  value: 'High',
-                                  child: Text('High Priority',style: TextStyle(color: Colors.white54)),),
-                                const PopupMenuItem(
-                                  value: 'Medium',
-                                  child: Text('Medium Priority',style: TextStyle(color: Colors.white54))),
-                                const PopupMenuItem(
-                                  value: 'Low',
-                                  child: Text('Low Priority',style: TextStyle(color: Colors.white54))),
-                                const PopupMenuItem(
-                                  value: 'Pending',
-                                  child: Text('Pending',style: TextStyle(color: Colors.white54))),
-                                const PopupMenuItem(
-                                  value: 'Completed',
-                                  child: Text('Completed',style: TextStyle(color: Colors.white54))),
-                                ],
-                                onSelected: (value) {
-                                  setState(() {
-                                    activeFilter = activeFilter == value ? null : value; // toggle off if same
-                                    keyword = ''; // Clear the search keyword when a filter is selected
-                                    inputdata.clear(); // Clear the search bar when a filter is selected
-                                    _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '',iscategory); // Call the filter function in TaskviewState to filter the task list based on the selected priority
-                                  });
-                                },
+                    
+                              const SizedBox(width: 10,),
                         
-                                  child: Center(
-                                    child: Text(activeFilter != null ? activeFilter == 'All' ? 'Filter By' : activeFilter! : 'Filter By',
-                                    style: TextStyle(color: Colors.white54, 
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),),
+                              Container(
+                                child: ElevatedButton(
+                                  onPressed: () => {
+                                    setState(() {
+                                      iscategory ? iscategory = false : iscategory = true;                                 _taskviewkey.currentState?.taskdata();
+                                      _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '',iscategory);
+                                    })
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize: Size(0, 58),
+                                    backgroundColor: iscategory == false ? Color.fromARGB(255, 22, 27, 34) : Colors.white,
+                                    foregroundColor: Colors.transparent,),
+                                  child: Text(
+                                    'Category',
+                                    style: TextStyle(
+                                      color: iscategory == false ? Colors.white54 : Color.fromARGB(255, 22, 27, 34),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                
                                 ),
-                             )),
-                    
-                          const SizedBox(width: 10,),
-                    
-                           Container(
-                            margin: EdgeInsets.only(top: 20),
-                             child: ElevatedButton(
-                              onPressed: () => {
-                                setState(() {
-                                  iscategory ? iscategory = false : iscategory = true;                                 _taskviewkey.currentState?.taskdata();
-                                   _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '',iscategory);
-                                })
-                              },
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: Size(0, 58),
-                                backgroundColor: iscategory == false ? Color.fromARGB(255, 22, 27, 34) : Colors.white,
-                                foregroundColor: Colors.transparent,),
-                              child: Text(
-                                'Category',
-                                style: TextStyle(
-                                  color: iscategory == false ? Colors.white54 : Color.fromARGB(255, 22, 27, 34),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                           ),
-                            ],),
-                ),
-                
-               Expanded(child: Taskview(key: _taskviewkey)),
-          
+                              ), 
+                              ],);
+
+                           if (isNarrow) {
+                            return
+                              SizedBox(
+                                width: (MediaQuery.of(context).size.width * 0.8).clamp(350, 800),
+                                height: 125, // Careful with this fixed height, if the height is given to mush the gap b/w the search box and filter will be too much, if given to less the filter will be too close to the search box
+                                  child: Column(
+                                    children: [
+                                      searchbox,
+                                      SizedBox(height: 10),
+                                      Center(child: filter),
+                                    ],
+                                  ));
+                                }
+                          return  
+                            SizedBox(
+                              width: (MediaQuery.of(context).size.width * 0.8).clamp(350, 800),
+                                child:  Row(
+                                  children: [
+                                    searchbox, 
+                                    SizedBox(width: 10),
+                                    Container(
+                                      margin: EdgeInsets.only(top: 20), // ← margin only in desktop
+                                      child: filter,
+                                    ),]
+                                ));
+                              }),
+
+                 Expanded(child: Taskview(key: _taskviewkey)),
               ],
             ),
           ),

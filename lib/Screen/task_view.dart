@@ -111,7 +111,7 @@ class TaskviewState extends State<Taskview>{
                 ),
                 child: Column(
                   children: [
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 10),
                          Expanded(
                            child: filtertask.isEmpty ? const Center(
                             child: Column(
@@ -120,7 +120,7 @@ class TaskviewState extends State<Taskview>{
                             Icon(Icons.add_task_rounded, color: Colors.white54, size: 100),
                             SizedBox(height: 15),
                             Text(
-                              'No tasks is created yet',
+                              'No tasks is added yet',
                               style: TextStyle(color: Colors.white54, fontSize: 20),
                             ),])
                            )
@@ -133,7 +133,7 @@ class TaskviewState extends State<Taskview>{
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(10),
                                             border: Border.all(color: filtertask[index].deadline == null ? Colors.grey 
-                                            : filtertask[index].deadline!.difference(currentDate).inDays  <= 4 && filtertask[index].deadline!.difference(currentDate).inDays > 0 ? Colors.orange 
+                                            : filtertask[index].deadline!.difference(currentDate).inDays  <= 4 && filtertask[index].deadline!.difference(currentDate).inDays >= 0 ? Colors.orange 
                                             : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? Colors.green 
                                             : Colors.red,
                                             width: MediaQuery.of(context).size.width > 620 ? 2 : 1.5),
@@ -146,7 +146,7 @@ class TaskviewState extends State<Taskview>{
                                                IconButton(
                                                  icon: Icon(filtertask[index].isComplete ? Icons.task_alt : Icons.circle_outlined),
                                                  color:  filtertask[index].deadline == null ? Colors.green 
-                                                : filtertask[index].deadline!.difference(currentDate).inDays  <= 4 && filtertask[index].deadline!.difference(currentDate).inDays > 0 ? Colors.orange 
+                                                : filtertask[index].deadline!.difference(currentDate).inDays  <= 4 && filtertask[index].deadline!.difference(currentDate).inDays >= 0 ? Colors.orange 
                                                 : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? Colors.green 
                                                 : Colors.red,
                                                  onPressed: () async {
@@ -173,12 +173,13 @@ class TaskviewState extends State<Taskview>{
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                       SizedBox(
-                                                        height: 50,
+                                                        height: 25,
                                                         child: SingleChildScrollView(
                                                           physics: ClampingScrollPhysics(),
                                                           child: Text(
                                                             filtertask[index].taskName, // Use the task title from the list
                                                             style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                                            maxLines:  MediaQuery.of(context).size.width < 420 ? 2 : 1,
                                                           ),
                                                         ),
                                                       ),
@@ -187,7 +188,7 @@ class TaskviewState extends State<Taskview>{
                                                         category: filtertask[index].category, // Use the task category from the list
                                                         deadline: filtertask[index].deadline, // Use the task deadline from the list
                                                         datecolor : filtertask[index].deadline == null ? 'grey' 
-                                                        : filtertask[index].deadline!.difference(currentDate).inDays <= 4 && filtertask[index].deadline!.difference(currentDate).inDays > 0 ? 'orange' 
+                                                        : filtertask[index].deadline!.difference(currentDate).inDays <= 4 && filtertask[index].deadline!.difference(currentDate).inDays >= 0 ? 'orange' 
                                                         : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? 'green' 
                                                         : 'red',
                                                       ),
