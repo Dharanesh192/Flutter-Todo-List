@@ -104,7 +104,7 @@ class TaskviewState extends State<Taskview>{
   Widget build(BuildContext context) {
     return Container(
                 margin: EdgeInsets.only(top: 20,bottom: 20),
-                width: MediaQuery.of(context).size.width > 500 ? MediaQuery.of(context).size.width * 0.9 :MediaQuery.of(context).size.width > 450 ? MediaQuery.of(context).size.width * 0.93 : MediaQuery.of(context).size.width * 0.95,
+                width: (MediaQuery.of(context).size.width * 0.95).clamp(100, 1150),
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(255, 22, 27, 34),
                   borderRadius: BorderRadius.circular(15),
@@ -133,7 +133,7 @@ class TaskviewState extends State<Taskview>{
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(10),
                                             border: Border.all(color: filtertask[index].deadline == null ? Colors.grey 
-                                            : filtertask[index].deadline!.difference(currentDate).inDays  <= 4 && filtertask[index].deadline!.difference(currentDate).inDays >= 0 ? Colors.orange 
+                                            : filtertask[index].deadline!.difference(currentDate).inHours  <= 96 && filtertask[index].deadline!.difference(currentDate).inHours > 0 ? Colors.orange 
                                             : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? Colors.green 
                                             : Colors.red,
                                             width: MediaQuery.of(context).size.width > 620 ? 2 : 1.5),
@@ -146,7 +146,7 @@ class TaskviewState extends State<Taskview>{
                                                IconButton(
                                                  icon: Icon(filtertask[index].isComplete ? Icons.task_alt : Icons.circle_outlined),
                                                  color:  filtertask[index].deadline == null ? Colors.green 
-                                                : filtertask[index].deadline!.difference(currentDate).inDays  <= 4 && filtertask[index].deadline!.difference(currentDate).inDays >= 0 ? Colors.orange 
+                                                : filtertask[index].deadline!.difference(currentDate).inHours  <= 96 && filtertask[index].deadline!.difference(currentDate).inHours > 0 ? Colors.orange 
                                                 : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? Colors.green 
                                                 : Colors.red,
                                                  onPressed: () async {
@@ -188,8 +188,8 @@ class TaskviewState extends State<Taskview>{
                                                         category: filtertask[index].category, // Use the task category from the list
                                                         deadline: filtertask[index].deadline, // Use the task deadline from the list
                                                         datecolor : filtertask[index].deadline == null ? 'grey' 
-                                                        : filtertask[index].deadline!.difference(currentDate).inDays <= 4 && filtertask[index].deadline!.difference(currentDate).inDays >= 0 ? 'orange' 
-                                                        : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? 'green' 
+                                                        : filtertask[index].deadline!.difference(currentDate).inHours <= 96 && filtertask[index].deadline!.difference(currentDate).inHours > 0 ? 'orange' 
+                                                        : filtertask[index].deadline!.difference(currentDate).inHours > 96 || filtertask[index].isComplete == true ? 'green' 
                                                         : 'red',
                                                       ),
                                                     ],
