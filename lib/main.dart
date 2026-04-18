@@ -258,7 +258,7 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                         final searchbox = Expanded(
                           child: Container(
                             height: 48,
-                            margin: EdgeInsets.only(top: 20, bottom: 0),
+                            margin: EdgeInsets.only(top: 20),
                             padding: EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
                               color: Color.fromARGB(255, 22, 27, 34),
@@ -275,6 +275,7 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                               hintText: 'Search bar',
                               hintStyle: TextStyle(color: Color.fromARGB(255, 117, 117, 115), fontWeight: FontWeight.w700, fontSize: 20,),
                               border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(vertical: 14)
                             ),
                             style: TextStyle(
                               color: Colors.white54,
