@@ -208,8 +208,9 @@ class _AddtaskState extends State<Addtask> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             suffixIcon: date.text.isNotEmpty ? 
-                            IconButton(icon: Icon(Icons.cancel_outlined),
+                            IconButton(icon: Icon(Icons.cancel_outlined,size: 20),
                             color: Colors.white54,
+                            tooltip: "Clear date",
                             hoverColor: Colors.transparent,
                             highlightColor: Colors.transparent,
                             padding: const EdgeInsets.only(right: 10),
@@ -240,10 +241,7 @@ class _AddtaskState extends State<Addtask> {
                                     size: Size(400, MediaQuery.of(context).size.height),
                                     ),
                                     child: Center(
-                                     child: ConstrainedBox(
-                                      constraints: BoxConstraints(maxWidth: 400),
                                       child: child!,
-                                    ),
                                   ),
                                 ));
                               },

@@ -113,15 +113,27 @@ class TaskviewState extends State<Taskview>{
                   children: [
                         const SizedBox(height: 5),
                          Expanded(
-                           child: ListView.builder(
+                           child: filtertask.isEmpty ? const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                            Icon(Icons.add_task_rounded, color: Colors.white54, size: 100),
+                            SizedBox(height: 15),
+                            Text(
+                              'No tasks is created yet',
+                              style: TextStyle(color: Colors.white54, fontSize: 20),
+                            ),])
+                           )
+                           : ListView.builder(
                               itemCount: filtertask.length, // Use the task count from the state
                               itemBuilder: (context, index) {
                                         return Container(
-                                          height: MediaQuery.of(context).size.width > 620 ? 100 : MediaQuery.of(context).size.width > 500 ? 120 : MediaQuery.of(context).size.width > 450 ? 140 :  180,
+                                          height: 100,
                                           margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(10),
                                             border: Border.all(color: filtertask[index].deadline == null ? Colors.grey 
+                                            : filtertask[index].deadline!.difference(currentDate).inDays  <= 4 && filtertask[index].deadline!.difference(currentDate).inDays > 0 ? Colors.orange 
                                             : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? Colors.green 
                                             : Colors.red,
                                             width: MediaQuery.of(context).size.width > 620 ? 2 : 1.5),
@@ -133,7 +145,10 @@ class TaskviewState extends State<Taskview>{
                                               children: [
                                                IconButton(
                                                  icon: Icon(filtertask[index].isComplete ? Icons.task_alt : Icons.circle_outlined),
-                                                 color: Colors.green,
+                                                 color:  filtertask[index].deadline == null ? Colors.green 
+                                                : filtertask[index].deadline!.difference(currentDate).inDays  <= 4 && filtertask[index].deadline!.difference(currentDate).inDays > 0 ? Colors.orange 
+                                                : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? Colors.green 
+                                                : Colors.red,
                                                  onPressed: () async {
                                                   setState(() {
                                                     filtertask[index].isComplete = !filtertask[index].isComplete; 
@@ -148,7 +163,6 @@ class TaskviewState extends State<Taskview>{
                                                     isComplete: filtertask[index].isComplete,
                                                     isSynced: filtertask[index].isSynced,
                                                     userId: filtertask[index].userId,  ));
-                                                    if(filtertask[index].isSynced==false) await Future.delayed(const Duration(milliseconds: 300));
                                                     taskdata();
                                                   },
                                                ),
@@ -158,19 +172,31 @@ class TaskviewState extends State<Taskview>{
                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      Text(
-                                                        filtertask[index].taskName, // Use the task title from the list
-                                                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                                      SizedBox(
+                                                        height: 50,
+                                                        child: SingleChildScrollView(
+                                                          physics: ClampingScrollPhysics(),
+                                                          child: Text(
+                                                            filtertask[index].taskName, // Use the task title from the list
+                                                            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                                          ),
+                                                        ),
                                                       ),
                                                       const SizedBox(height: 5),
                                                       TaskSubtitle(
                                                         category: filtertask[index].category, // Use the task category from the list
                                                         deadline: filtertask[index].deadline, // Use the task deadline from the list
-                                                        datecolor : filtertask[index].deadline == null ? true : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? true : false
+                                                        datecolor : filtertask[index].deadline == null ? 'grey' 
+                                                        : filtertask[index].deadline!.difference(currentDate).inDays <= 4 && filtertask[index].deadline!.difference(currentDate).inDays > 0 ? 'orange' 
+                                                        : filtertask[index].deadline!.difference(currentDate).inHours > 0 || filtertask[index].isComplete == true ? 'green' 
+                                                        : 'red',
                                                       ),
                                                     ],
                                                   ),
                                                 ),
+
+                                                const SizedBox(width: 10),
+
                                                 Container(
                                                   padding: const EdgeInsets.all(10),
                                                   margin: const EdgeInsets.only(right: 20),
@@ -223,9 +249,14 @@ class TaskviewState extends State<Taskview>{
                                                                 isScrollControlled: true,
                                                                 backgroundColor: Colors.transparent,
                                                                 builder: (context) => Center(
-                                                                  child:SizedBox(
+                                                                  child: Container (
+                                                                    clipBehavior: Clip.hardEdge, // it prevents the content from Addtask is overflowing outside the container when the keyboard appears
+                                                                    decoration: BoxDecoration(
+                                                                      color: Color.fromARGB(255, 13, 17, 23),
+                                                                      borderRadius: BorderRadius.circular(15),
+                                                                    ),
                                                                     width: (MediaQuery.of(context).size.width * 0.75).clamp(100, 475),
-                                                                    height: 420,
+                                                                    height: (MediaQuery.of(context).size.height * 0.6).clamp(420, 475),
                                                                     child: Edittask(
                                                                     currenttask:filtertask[index].taskName,
                                                                     currentpriority: filtertask[index].priority,
@@ -243,15 +274,26 @@ class TaskviewState extends State<Taskview>{
                                                               }
                                                             }
                                                             else if (value == 'delete') {
-                                                                await _table.deleteTask(filtertask[index].taskId);
+                                                                final removedtask = filtertask[index];
                                                                 setState(() {
                                                                 filtertask.removeAt(index); // Remove the task from the list
                                                                 taskcount--; // Decrease the task count
                                                               });
+                                                              try {
+                                                                await _table.deleteTask(removedtask.taskId); // Delete the task from the database
+                                                              } catch (e) {
+                                                                setState(() {
+                                                                  filtertask.insert(index, removedtask); // Revert the UI change if deletion fails
+                                                                  taskcount++; // Revert the task count
+                                                                });
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(content: Text('Failed to delete task. Please try again.')),
+                                                                );
+                                                              }
                                                           }
                                                         },
                                                       ),
-                                                    ),],  
+                                                    ),]  
                                             ),
                                           ),
                                         );

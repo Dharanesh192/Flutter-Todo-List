@@ -137,7 +137,7 @@ class _EdittaskState extends State<Edittask> {
                       ],
                     ),
                 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 5),
                 
                     Align(
                       alignment: Alignment.centerLeft,
@@ -250,7 +250,7 @@ class _EdittaskState extends State<Edittask> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             suffixIcon: date.text.isNotEmpty ? 
-                            IconButton(icon: Icon(Icons.cancel_sharp, size: 20,),
+                            IconButton(icon: Icon(Icons.cancel_outlined, size: 20),
                             color: Colors.white54,
                             tooltip: "Clear date",
                             hoverColor: Colors.transparent,
@@ -267,7 +267,7 @@ class _EdittaskState extends State<Edittask> {
                             dateFocus.unfocus();
                             DateTime? pickedDate = await showDatePicker(
                               context: context,
-                              initialDate: DateTime.now(),
+                              initialDate: editselectedDate ?? DateTime.now(),
                               firstDate: DateTime(2000),
                               lastDate: DateTime(2200),
                               builder: (context, child) {
@@ -280,14 +280,15 @@ class _EdittaskState extends State<Edittask> {
                                       onSurface: Colors.white,
                                     ),
                                   ),
+                                  child: MediaQuery(data: MediaQuery.of(context).copyWith(
+                                    size: Size(400, MediaQuery.of(context).size.height),
+                                    ),
                                   child: Center(
                                     child: SizedBox(
-                                      width: MediaQuery.of(context).size.width > 550 ?  MediaQuery.of(context).size.width * 0.7 :  MediaQuery.of(context).size.width * 0.9,
-                                      height: 575,
                                       child: child,
                                     ),
                                   ),
-                                );
+                                ));
                               },
                             );
                 

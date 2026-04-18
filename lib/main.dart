@@ -364,14 +364,14 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                                 })
                               },
                               style: ElevatedButton.styleFrom(
-                                minimumSize: Size(0, 48),
+                                minimumSize: Size(0, 58),
                                 backgroundColor: iscategory == false ? Color.fromARGB(255, 22, 27, 34) : Colors.white,
                                 foregroundColor: Colors.transparent,),
                               child: Text(
                                 'Category',
                                 style: TextStyle(
                                   color: iscategory == false ? Colors.white54 : Color.fromARGB(255, 22, 27, 34),
-                                  fontSize: 18,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -393,9 +393,14 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
                   builder: (context) =>Center(
-                    child: SizedBox (
+                    child: Container (
+                      clipBehavior: Clip.hardEdge, // it prevents the content from Addtask is overflowing outside the container when the keyboard appears
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 13, 17, 23),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       width: (MediaQuery.of(context).size.width * 0.75).clamp(100, 475),
-                      height: 420,
+                      height: (MediaQuery.of(context).size.height * 0.6).clamp(420, 475),
                       child: const Addtask(),
                     ),
                   ),);
@@ -410,7 +415,7 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
             },
             backgroundColor: const Color(0xFF00FF00),
             shape: const CircleBorder(),
-            child: const Icon(Icons.add_task_sharp, color: Colors.black,size: 35,),
+            child: const Icon(Icons.add_task_rounded, color: Colors.black,size: 35,),
           ),
         ),
       ),

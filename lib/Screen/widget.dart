@@ -33,7 +33,7 @@ class Textstyler extends StatelessWidget {
 class TaskSubtitle extends StatelessWidget {
   final String? category;
   final DateTime? deadline;
-  final bool? datecolor;
+  final String? datecolor;
 
   const TaskSubtitle({
     required this.category,
@@ -54,10 +54,10 @@ class TaskSubtitle extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.calendar_today, size: 14, color: datecolor! ? Colors.green : Colors.red),
+            Icon(Icons.calendar_today, size: 14, color: datecolor == 'green' ? Colors.green : datecolor == 'orange' ? Colors.orange : Colors.red),
             Text(
               ' ${deadline.toString().replaceAll(' 00:00:00.000', '')}',
-              style: TextStyle(color : datecolor! ? Colors.green : Colors.red, fontWeight: FontWeight.bold),
+              style: TextStyle(color : datecolor == 'grey' ? Colors.grey : datecolor == 'green' ? Colors.green : datecolor == 'orange' ? Colors.orange : Colors.red, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -88,6 +88,7 @@ class Editortextstyler extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      autofocus: true,
       style: const TextStyle(color: Colors.white54),
       decoration: InputDecoration(
       hintText: hint,
