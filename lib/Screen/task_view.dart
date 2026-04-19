@@ -1,5 +1,6 @@
 // Need to fix the dispaly task issue when switching between search by name and category with a seacrh value
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:to_do_list/repository/task_repository.dart';
 import 'package:to_do_list/models/task_model.dart';
 import 'package:to_do_list/Screen/edit_screen.dart';
@@ -24,6 +25,7 @@ class TaskviewState extends State<Taskview>{
   String selectedFilter = 'All';
   String searchKeyword = '';
   bool category = false;
+  late final RealtimeChannel _channel;
 
   Future<void> taskdata() async {
     final value = await _table.getTaskCount();
@@ -86,16 +88,41 @@ class TaskviewState extends State<Taskview>{
     });
   }
 
+  void _listenRealtime() {
+  final supabase = Supabase.instance.client;
+  if (supabase.auth.currentUser == null) return; // guest users skip this
+
+  _channel = supabase
+    .channel('task_changes')          // unique websocket topic name
+    .onPostgresChanges(
+      event: PostgresChangeEvent.all, // insert + update + delete
+      schema: 'public',
+      table: 'Task management',       // supabase table to watch
+      filter: PostgresChangeFilter(
+        type: PostgresChangeFilterType.eq,
+        column: 'User_id',
+        value: supabase.auth.currentUser!.id, // only MY tasks
+      ),
+      callback: (payload) async {
+        await TaskRepository().pullTasksFromSupabase(); // fetch latest
+        taskdata();                                     // refresh UI
+      },
+    )
+    .subscribe(); // open websocket + start listening
+}
+
   @override
   void initState() {
     super.initState();
     taskdata();
     _midnighttimer(); // Start the midnight timer
+    _listenRealtime();
     currentDate = DateTime.now(); // Initialize currentDate with the current date
   }
 
   @override
   void dispose() {
+    Supabase.instance.client.removeChannel(_channel);
     _timer.cancel(); // Cancel the timer when the widget is disposed
     super.dispose();
   }

@@ -257,6 +257,7 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                         final isNarrow = constraints.maxWidth < 600;
                         final searchbox = Expanded(
                           child: Container(
+                            height: 60,
                             margin: EdgeInsets.only(top: 20),
                             padding: EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
@@ -274,7 +275,6 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                               hintText: 'Search bar',
                               hintStyle: TextStyle(color: Color.fromARGB(255, 117, 117, 115), fontWeight: FontWeight.w700, fontSize: 20,),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(vertical: 14)
                             ),
                             style: TextStyle(
                               color: Colors.white54,
@@ -351,8 +351,7 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                     
                               const SizedBox(width: 10,),
                         
-                              Container(
-                                child: ElevatedButton(
+                                ElevatedButton(
                                   onPressed: () => {
                                     setState(() {
                                       iscategory ? iscategory = false : iscategory = true;                                 _taskviewkey.currentState?.taskdata();
@@ -360,7 +359,7 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                                     })
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    minimumSize: Size(0, 58),
+                                    minimumSize: Size(0, 48),
                                     backgroundColor: iscategory == false ? Color.fromARGB(255, 22, 27, 34) : Colors.white,
                                     foregroundColor: Colors.transparent,),
                                   child: Text(
@@ -372,7 +371,7 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                                     ),
                                   ),
                                 ),
-                              ), 
+                              
                               ],);
 
                            if (isNarrow) {
