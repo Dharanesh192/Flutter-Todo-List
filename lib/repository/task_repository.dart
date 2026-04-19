@@ -167,7 +167,8 @@ class TaskRepository
       if (task.updatedAt.isAfter(localTask.updatedAt)) {
         await _table.record(task.taskId).put(db, task.toMap());
       }
-    } else {
+    } 
+    else {
       await _table.record(task.taskId).put(db, task.toMap());
     }
     }}

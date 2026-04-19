@@ -257,7 +257,6 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                         final isNarrow = constraints.maxWidth < 600;
                         final searchbox = Expanded(
                           child: Container(
-                            height: 48,
                             margin: EdgeInsets.only(top: 20),
                             padding: EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
