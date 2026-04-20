@@ -257,7 +257,7 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                         final isNarrow = constraints.maxWidth < 600;
                         final searchbox = Expanded(
                           child: Container(
-                            height: 60,
+                            height: 48,
                             margin: EdgeInsets.only(top: 20),
                             padding: EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
@@ -354,12 +354,13 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                                 ElevatedButton(
                                   onPressed: () => {
                                     setState(() {
-                                      iscategory ? iscategory = false : iscategory = true;                                 _taskviewkey.currentState?.taskdata();
+                                      iscategory ? iscategory = false : iscategory = true;                                 
+                                      _taskviewkey.currentState?.taskdata();
                                       _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '',iscategory);
                                     })
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    minimumSize: Size(0, 48),
+                                    fixedSize: const Size.fromHeight(48),
                                     backgroundColor: iscategory == false ? Color.fromARGB(255, 22, 27, 34) : Colors.white,
                                     foregroundColor: Colors.transparent,),
                                   child: Text(
