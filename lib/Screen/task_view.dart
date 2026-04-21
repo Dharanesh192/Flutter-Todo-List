@@ -33,8 +33,8 @@ class TaskviewState extends State<Taskview>{
     setState(() {
       taskcount = value;
       filtertask = tasks;
-      search(selectedFilter, searchKeyword, category);
     });
+    search(selectedFilter, searchKeyword, category);
   }
 
   void search(String filter,String keyword,bool iscategory){
