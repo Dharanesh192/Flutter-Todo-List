@@ -27,15 +27,19 @@ class TaskviewState extends State<Taskview>{
   bool category = false;
   late final RealtimeChannel _channel;
 
-  Future<void> taskdata() async {
-    final value = await _table.getTaskCount();
-    tasks = await _table.getAllTasks();
-    setState(() {
-      taskcount = value;
-      filtertask = tasks;
-    });
-    search(selectedFilter, searchKeyword, category);
-  }
+Future<void> taskdata() async {
+  final newTasks = await _table.getAllTasks();
+  final count = await _table.getTaskCount();
+
+  if (!mounted) return;
+
+  setState(() {
+    tasks = newTasks;
+    taskcount = count;
+  });
+
+  search(selectedFilter, searchKeyword, category); // will refine UI
+}
 
   void search(String filter,String keyword,bool iscategory){
     selectedFilter = filter;
@@ -105,10 +109,8 @@ class TaskviewState extends State<Taskview>{
       ),
       callback: (payload) async {
         await TaskRepository().pullTasksFromSupabase(); // fetch latest
-        if (mounted) {
+        if (!mounted) return;
         await taskdata(); // refresh UI
-        setState(() {});
-        }  
       },
     ).subscribe(); // open websocket + start listening
 }
