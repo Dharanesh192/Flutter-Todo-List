@@ -105,7 +105,9 @@ class TaskviewState extends State<Taskview>{
       ),
       callback: (payload) async {
         await TaskRepository().pullTasksFromSupabase(); // fetch latest
-        await taskdata(); // refresh UI
+        if (mounted) {setState(() {});}
+        taskdata(); // refresh UI
+        
       },
     )
     .subscribe(); // open websocket + start listening
