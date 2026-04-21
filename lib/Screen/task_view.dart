@@ -206,7 +206,6 @@ class TaskviewState extends State<Taskview>{
                                                           child: Text(
                                                             filtertask[index].taskName, // Use the task title from the list
                                                             style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                                                            maxLines:  MediaQuery.of(context).size.width < 420 ? 2 : 1,
                                                           ),
                                                         ),
                                                       ),
