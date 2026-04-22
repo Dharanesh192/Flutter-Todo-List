@@ -106,7 +106,9 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
             data.event == AuthChangeEvent.signedIn) {
           if (data.session == null) return;
 
-          setState(() {}); // ← update UI immediately (avatar appears now)
+          setState(() {
+            _taskviewkey.currentState?.listenRealtime(); 
+          }); // ← update UI immediately (avatar appears now)
 
           Future.delayed(Duration.zero, () async {
             if(!mounted)return;

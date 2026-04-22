@@ -25,21 +25,18 @@ class TaskviewState extends State<Taskview>{
   String selectedFilter = 'All';
   String searchKeyword = '';
   bool category = false;
-  late final RealtimeChannel _channel;
+  late final RealtimeChannel? _channel;
 
-Future<void> taskdata() async {
-  final newTasks = await _table.getAllTasks();
-  final count = await _table.getTaskCount();
-
-  if (!mounted) return;
-
-  setState(() {
-    tasks = newTasks;
-    taskcount = count;
-  });
-
-  search(selectedFilter, searchKeyword, category); // will refine UI
-}
+  Future<void> taskdata() async {
+    final value = await _table.getTaskCount();
+    tasks = await _table.getAllTasks();
+    setState(() {
+      taskcount = value;
+      filtertask = tasks;
+    });
+    search(selectedFilter, searchKeyword, category);
+    WidgetsBinding.instance.scheduleFrame();
+  }
 
   void search(String filter,String keyword,bool iscategory){
     selectedFilter = filter;
@@ -92,7 +89,7 @@ Future<void> taskdata() async {
     });
   }
 
-  void _listenRealtime() {
+  void listenRealtime() {
   final supabase = Supabase.instance.client;
   if (supabase.auth.currentUser == null) return; // guest users skip this
 
@@ -120,14 +117,15 @@ Future<void> taskdata() async {
     super.initState();
     taskdata();
     _midnighttimer(); // Start the midnight timer
-    _listenRealtime();
+    listenRealtime();
     currentDate = DateTime.now(); // Initialize currentDate with the current date
   }
 
   @override
   void dispose() {
-    Supabase.instance.client.removeChannel(_channel);
-    _timer.cancel(); // Cancel the timer when the widget is disposed
+      if (_channel != null) {
+          Supabase.instance.client.removeChannel(_channel);}
+      _timer.cancel(); // Cancel the timer when the widget is disposed
     super.dispose();
   }
 
