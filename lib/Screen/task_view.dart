@@ -24,7 +24,7 @@ class TaskviewState extends State<Taskview>{
   String selectedFilter = 'All';
   String searchKeyword = '';
   bool category = false;
-  late final RealtimeChannel? _channel;
+  RealtimeChannel? _channel;
 
   Future<void> taskdata() async {
     final value = await _table.getTaskCount();
@@ -92,6 +92,11 @@ class TaskviewState extends State<Taskview>{
   final supabase = Supabase.instance.client;
   if (supabase.auth.currentUser == null) return; // guest users skip this
 
+  if(_channel != null) {
+    supabase.removeChannel(_channel!); // Remove existing channel if it exists
+    _channel = null;
+  }
+
   _channel = supabase
     .channel('task_changes')          // unique websocket topic name
     .onPostgresChanges(
@@ -104,7 +109,7 @@ class TaskviewState extends State<Taskview>{
         value: supabase.auth.currentUser!.id, // only MY tasks
       ),
       callback: (payload) async {
-        await TaskRepository().pullTasksFromSupabase(); // fetch latest
+        await _table.pullTasksFromSupabase(); // fetch latest
         if (!mounted) return;
         await taskdata(); // refresh UI
       },
@@ -123,7 +128,7 @@ class TaskviewState extends State<Taskview>{
   @override
   void dispose() {
       if (_channel != null) {
-          Supabase.instance.client.removeChannel(_channel);}
+          Supabase.instance.client.removeChannel(_channel!);}
       _timer.cancel(); // Cancel the timer when the widget is disposed
     super.dispose();
   }

@@ -146,32 +146,35 @@ class TaskRepository
       final records = await _table.find(db);
       return records.length;
   }
-  
+
   Future<void> pullTasksFromSupabase() async {
     if (_supabase.auth.currentUser == null) return;
-    final db = await dbcreation;
-    final response = await _supabase
-        .from('focus_hub')
-        .select()
-        .eq('User_id', _supabase.auth.currentUser!.id);
-
-    for (var row in response) {
-      final existingRecord = await _table.record(row['Task_id']).get(db);
-      final task = TaskModel.fromSupabaseMap(row);
-    // 👉 if not exists → insert
-    // 👉 if exists → update ONLY if newer
-    if (existingRecord != null) {
-      final localTask = TaskModel.fromMap(existingRecord);
-
-      // 🧠 only update if server version is newer
-      if (task.updatedAt.isAfter(localTask.updatedAt)) {
-        await _table.record(task.taskId).put(db, task.toMap());
+    try { // ← wrap everything
+      final db = await dbcreation;
+      final response = await _supabase
+          .from('focus_hub')
+          .select()
+          .eq('User_id', _supabase.auth.currentUser!.id);
+      for (var row in response) {
+        try { // ← per row try-catch
+          final existingRecord = await _table.record(row['Task_id']).get(db);
+          final task = TaskModel.fromSupabaseMap(row);
+          if (existingRecord != null) {
+            final localTask = TaskModel.fromMap(existingRecord);
+            if (task.updatedAt.isAfter(localTask.updatedAt)) {
+              await _table.record(task.taskId).put(db, task.toMap());
+            }
+          } else {
+            await _table.record(task.taskId).put(db, task.toMap());
+          }
+        } catch (e) {
+          debugPrint('row parse failed: $e → row: $row'); // ← see which row fails
+        }
       }
-    } 
-    else {
-      await _table.record(task.taskId).put(db, task.toMap());
+    } catch (e) {
+      debugPrint('pull failed: $e');
     }
-    }}
+  }
 
   Future<bool> guesttask()async {
     final db = await dbcreation;

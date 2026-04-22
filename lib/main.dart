@@ -24,7 +24,7 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _Homepagestate();
 }
 
-class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
+class _Homepagestate extends State<Homepage> {
 
   final _taskviewkey = GlobalKey<TaskviewState>(); // Create a global key to access the TaskviewState and refresh the UI after adding a task
   final TextEditingController inputdata = TextEditingController();
@@ -34,7 +34,6 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
   String? keyword; // New variable to track the search keyword
   String? activeFilter; // New variable to track the active filter
   bool get isLoggedIn => _supabase.auth.currentUser != null;
-  bool istype = false;
   late final StreamSubscription<AuthState> _authSubscription;
   late final StreamSubscription _connectivitySubscription;
   final _navigatorKey = GlobalKey<NavigatorState>();
@@ -106,12 +105,10 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
             data.event == AuthChangeEvent.signedIn) {
           if (data.session == null) return;
 
-          setState(() {
-            _taskviewkey.currentState?.listenRealtime(); 
-          }); // ← update UI immediately (avatar appears now)
-
+          setState(() {}); // ← update UI immediately (avatar appears now)
           Future.delayed(Duration.zero, () async {
             if(!mounted)return;
+            _taskviewkey.currentState?.listenRealtime(); // ← start listening to realtime changes immediately (sync happens now if there are any pending tasks or if the user logged in from another device)
             if (!(await _repository.guesttask())) {
               // show snackbar at bottom
               ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
@@ -129,10 +126,9 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
               );
 
               await _repository.pullTasksFromSupabase();
-
               // hide snackbar after done
               ScaffoldMessenger.of(_navigatorKey.currentContext!).hideCurrentSnackBar();
-              _taskviewkey.currentState?.taskdata();
+              await _taskviewkey.currentState?.taskdata();
               return;
             }
             await showDialog(
@@ -150,12 +146,13 @@ class _Homepagestate extends State<Homepage> with WidgetsBindingObserver {
                 ),
               ),
             );
-          _taskviewkey.currentState?.taskdata(); // ← refresh tasks after sync
+          await _taskviewkey.currentState?.taskdata(); // ← refresh tasks after sync
           });
         }
 
         if (data.event == AuthChangeEvent.signedOut) {
           Future.delayed(Duration(milliseconds: 500),(){
+        if (!mounted)return;
           setState(() {}); // this was already immediate, should be fine
           _taskviewkey.currentState?.taskdata();
           });
