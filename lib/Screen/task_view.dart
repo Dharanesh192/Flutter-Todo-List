@@ -1,4 +1,3 @@
-// Need to fix the dispaly task issue when switching between search by name and category with a seacrh value
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:to_do_list/repository/task_repository.dart';
@@ -98,7 +97,7 @@ class TaskviewState extends State<Taskview>{
     .onPostgresChanges(
       event: PostgresChangeEvent.all, // insert + update + delete
       schema: 'public',
-      table: 'Task management',       // supabase table to watch
+      table: 'focus_hub',       // supabase table to watch
       filter: PostgresChangeFilter(
         type: PostgresChangeFilterType.eq,
         column: 'User_id',
