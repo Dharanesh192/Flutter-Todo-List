@@ -143,7 +143,8 @@ class TaskRepository
     final finder = Finder(sortOrders: 
     [
       SortOrder('isComplete',true), // -> sort by isComplete in ascending order (false first then true).
-      SortOrder('createdAt', false) // -> sort by createdAt in descending order (newest first).
+      SortOrder('deadline',true),
+      SortOrder('createdAt',false)
     ],); 
     /* Finder is like a query/condition used in find to get the data as per given query/condition.
     It like a variable used to store the query/condition */
