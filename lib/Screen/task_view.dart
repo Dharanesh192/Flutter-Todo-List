@@ -213,7 +213,16 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                     itemBuilder: (context, index) {
                       if (index == pendingtasks.length) { // This if-condition is to place the complete header in place after displaying all the pending task 
                         return Container(
-                          color: const Color.fromARGB(255, 22, 27, 34),
+                          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(36, 40, 48, 0.55),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color:  Colors.white54,
+                              width: MediaQuery.of(context).size.width > 620 ? 2 : 1.5,
+                            )
+                          ),
                           child: ListTile(
                             title: Text('Completed (${completedtasks.length})', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                             leading: IconButton(
