@@ -47,10 +47,9 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
   void _filter(String filter, String keyword, bool iscategory) {
     setState(() {
       var temp = tasks;
-      if (filter == 'Completed') {
-        temp = tasks.where((task) => task.isComplete).toList(); // Show only completed tasks
-      } else if (filter == 'Pending') {
-        temp = tasks.where((task) => !task.isComplete).toList(); // Show only incomplete tasks
+      if (filter == 'Deadline') {
+        temp = tasks.where((v) => v.deadline != null && v.isComplete == false).toList(); // Show only incomplete tasks
+        temp.sort((a, b) =>   a.deadline!.compareTo(b.deadline!),);
       } else if (filter == 'High') {
         temp = tasks.where((task) => task.priority == 'High').toList(); // Show only high-priority tasks
       } else if (filter == 'Medium') {
@@ -244,8 +243,9 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                       6.) So that's why I use this second (if-statement) to solve this
                       */
                         return Container(
-                        height: 100,
+                        constraints: const BoxConstraints(minHeight: 100), // Set a minimum height 100 for the container to ensure it doesn't shrink too much and this make the container expandable when needed
                         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        padding: const EdgeInsets.symmetric(vertical: 5),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
@@ -284,19 +284,15 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min, // We not set the min height of the parent container so to avoid the text overflow we use this property to make the column height as minimum as possible
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SizedBox(
-                                      height: 25,
-                                      child: SingleChildScrollView(
-                                        physics: ClampingScrollPhysics(),
-                                        child: Text(
-                                          filtertask[index].taskName, // Use the task title from the list
-                                          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ),
+                                         Text(
+                                            filtertask[index].taskName, // Use the task title from the list
+                                            style: const TextStyle(height: 1.3, color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                          ),
+                                    
                                     const SizedBox(height: 5),
                                     TaskSubtitle(
                                       category: filtertask[index].category, // Use the task category from the list

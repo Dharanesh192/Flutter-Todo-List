@@ -138,13 +138,12 @@ class TaskRepository
 
   // Get all tasks
   Future<List<TaskModel>> getAllTasks() async {
-    final db = await dbcreation; // database object
+  final db = await dbcreation;
 
-    final finder = Finder(sortOrders: 
+  final finder = Finder(sortOrders: 
     [
       SortOrder('isComplete',true), // -> sort by isComplete in ascending order (false first then true).
-      SortOrder('deadline',true),
-      SortOrder('createdAt',false)
+      SortOrder('createdAt',false),
     ],); 
     /* Finder is like a query/condition used in find to get the data as per given query/condition.
     It like a variable used to store the query/condition */
@@ -164,7 +163,7 @@ class TaskRepository
                   that repectly call 
                   like for loop.  
     */
-  }
+}
 
   Future<void> pullTasksFromSupabase() async {
     if (_supabase.auth.currentUser == null) return;

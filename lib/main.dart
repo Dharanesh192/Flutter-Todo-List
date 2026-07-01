@@ -280,12 +280,8 @@ class _Homepagestate extends State<Homepage> {
                                 child: Text('Low Priority', style: TextStyle(color: Colors.white54)),
                               ),
                               const PopupMenuItem(
-                                value: 'Pending',
-                                child: Text('Pending', style: TextStyle(color: Colors.white54)),
-                              ),
-                              const PopupMenuItem(
-                                value: 'Completed',
-                                child: Text('Completed', style: TextStyle(color: Colors.white54)),
+                                value: 'Deadline',
+                                child: Text('By deadline', style: TextStyle(color: Colors.white54)),
                               ),
                             ],
                             onSelected: (value) {
