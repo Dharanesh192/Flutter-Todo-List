@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart'; // To use Kisweb method
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:to_do_list/repository/task_repository.dart';
 import 'package:to_do_list/models/task_model.dart';
 import 'package:to_do_list/Screen/edit_screen.dart';
 // ignore: avoid_web_libraries_in_flutter, deprecated_member_use
-import 'dart:html' as html;
+import 'dart:html' as html; // Used in the _setvisibilityListener method to listen for visibility changes in the browser tab
 import 'widget.dart';
 import 'dart:async';
 
@@ -47,9 +48,9 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
   void _filter(String filter, String keyword, bool iscategory) {
     setState(() {
       var temp = tasks;
-      if (filter == 'Deadline') {
-        temp = tasks.where((v) => v.deadline != null && v.isComplete == false).toList(); // Show only incomplete tasks
-        temp.sort((a, b) =>   a.deadline!.compareTo(b.deadline!),);
+
+      if (filter == 'All') {
+        temp = tasks; // If the filter is 'All', show all tasks
       } else if (filter == 'High') {
         temp = tasks.where((task) => task.priority == 'High').toList(); // Show only high-priority tasks
       } else if (filter == 'Medium') {
@@ -57,13 +58,17 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
       } else if (filter == 'Low') {
         temp = tasks.where((task) => task.priority == 'Low').toList(); // Show only Low priority tasks
       } else {
-        temp = tasks; // If the filter is 'All', show all tasks
+        temp = tasks.where((v) => v.deadline != null && v.isComplete == false).toList(); // Show only incomplete tasks
+        temp.sort((a, b) =>   a.deadline!.compareTo(b.deadline!),);
       } 
-      if (iscategory) {
-        temp = temp.where((task) => task.category != null ? task.category!.toLowerCase().contains(keyword.toLowerCase()) : false).toList();
-      } else {
+      
+      // Check the category is turned on / off
+      if (iscategory) { // Seacrh in category
+        temp = temp.where((task) => task.category != null ? task.category!.toLowerCase().contains(keyword.toLowerCase()/*The contains keyword is used to check if the charaters in the left string match with the right string and return them*/) : false).toList();
+      } else { // Seacrh in the task name
         temp = temp.where((task) => task.taskName.toLowerCase().contains(keyword.toLowerCase())).toList();
       }
+
       filtertask = temp;
       pendingtasks = filtertask.where((task) => !task.isComplete).toList();
       completedtasks = filtertask.where((task) => task.isComplete).toList();
@@ -84,15 +89,48 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
     });
   }
 
-  void _setupVisibilityListener() {
-    _visibilitySubscription = html.document.onVisibilityChange.listen((event) {
-      if (html.document.visibilityState == 'visible') {
-        if (mounted) {
-          taskdata();
+  void _setupVisibilityListener() { // It is used to check visibility of the app in the (browser level like tab switching, window minimize, screen lock)
+    if(kIsWeb) { // Check if the app is running in web. This line is checked in compile if the build is web then the code execute otherwise it will not execute in mobile or desktop otherwise it may cause error.
+    _visibilitySubscription?.cancel(); // Cancel any existing subscription to avoid multiple listeners
+      _visibilitySubscription = html.document.onVisibilityChange.listen((_) { 
+        if (html.document.visibilityState == 'visible') { 
+          if (mounted) {
+            taskdata();
+          }
         }
-      }
-    });
+      });
+    }
   }
+  /*
+   * _visibilitySubscription (StreamSubscription)
+   *   → Stores the handle to a specific (html.document.onVisibilityChange) subscription on the browser stream
+   *   → Does NOT own the stream
+   *   → Provides lifecycle controls for this subscription only (cancel(), pause(), resume())
+   * 
+   * html.document.onVisibilityChange
+   *   → A browser-native Stream provided by the Page Visibility API (dart:html wrapper)
+   *   → Fires a DOM event whenever the tab transitions between foreground and background
+   *   → Triggered by: tab switching, window minimize, screen lock
+   *   → Passive — no background thread, no polling, zero CPU between events
+   *     (like a doorbell wire — exists silently, only activates when button is pressed)
+   *
+   * .listen((_) { })
+   *   → Called when the Stream to register a callback
+   *   → In runtime Dart attaches this callback to the browser's event system
+   *   → Returns a StreamSubscription object (stored in _visibilitySubscription)
+   *   → The callback executes every time the stream emits an event
+   *   → Parameter named (_) because the event object carries no useful data —
+   *     actual state is read from html.document.visibilityState separately
+   *
+   *
+   * Analogy:
+   *   Stream (onVisibilityChange) = doorbell wire running through the wall (always exists)
+   *   .listen()                   = connecting your bell to the wire
+   *   StreamSubscription          = the connection itself (lets you disconnect later)
+   *   .cancel()                   = disconnecting your bell (wire keeps existing)
+   *   visibilitychange event      = someone pressing the doorbell button
+   */
+
 
   void listenRealtime() {
     final supabase = Supabase.instance.client;
@@ -155,9 +193,11 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  // If function is only valid when compile in other platforms (desktop, mobile) in the browser everything is handle by the _setupVisibilityListener()
+  void didChangeAppLifecycleState(AppLifecycleState state) { // It is used to check visibility of the app in the (OS level like app switching, window minimize, screen lock)
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
+    if (kIsWeb) return; // If the app is running in web then this function will not execute because the visibility is handled by the _setupVisibilityListener()
+    if (state == AppLifecycleState.resumed) { // Fire this event when the app is resumed from background (like app switching, window minimize, screen lock)
       if (mounted) {
         taskdata();
       }
@@ -165,7 +205,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
   }
 
   @override
-  void initState() {
+  void initState() { // This is used call the mentioned functions when the app is started or resumed from background
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     taskdata();
@@ -176,7 +216,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
   }
 
   @override
-  void dispose() {
+  void dispose() { // This is used to cancel the timer and remove the observer when the (widget is disposed / the app is closed)
     if (_channel != null) {
       Supabase.instance.client.removeChannel(_channel!);
     }
