@@ -134,62 +134,99 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
 
   void listenRealtime() {
     final supabase = Supabase.instance.client;
-    if (supabase.auth.currentUser == null) return;
+    if (supabase.auth.currentUser == null) return; // it is a guest user if then no channel is needed to listen for changes, so return early
 
-    if (_channel != null) {
-      supabase.removeChannel(_channel!);
-      _channel = null;
+    if (_channel != null) { // Check if a channel is already exist, if exist then remove it to avoid multiple channel subscription and memory leak
+      supabase.removeChannel(_channel!); // Remove the existing channel from the Supabase client
+      _channel = null; // Reset the channel variable to null to indicate that there is no active channel
     }
 
     _channel = supabase
-        .channel('task_changes')
-        .onPostgresChanges(
-          event: PostgresChangeEvent.all,
-          schema: 'public',
-          table: 'focus_hub',
-          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'User_id', value: supabase.auth.currentUser!.id),
-          callback: (payload) async {
+        .channel('task_changes') // This is the name of the channel, you can give any name but it should be unique for each channel
+        .onPostgresChanges( // Why postgres change you may ask? Because the Supabase database is built on top of PostgreSQL, so we are listening for changes in the PostgreSQL database.
+          event: PostgresChangeEvent.all, // Listen for all types of changes (insert, update, delete) happend in the database
+          schema: 'public', // The schema is the namespace in the database where your tables are located. In Supabase, the default schema is 'public', so we are listening for changes in the 'public' schema. 
+
+          /*They are total 4 schema in the Supabase database
+          public
+            → where YOUR tables live (focus_hub lives here)
+            → readable/writable by your app via API
+             
+          auth
+            → where Supabase's internal auth tables live
+            → users, sessions, refresh tokens
+            → NOT directly accessible by your app code
+             
+          storage     
+            → where Supabase Storage metadata lives
+            → if you use file uploads
+             
+          extensions  
+            → PostgreSQL extensions installed on the project
+          */
+
+          table: 'focus_hub', // Table name in that schema where to listen for the changes.
+          filter: PostgresChangeFilter( 
+
+          /*
+          PostgresChangeFilterType.eq     →   =      (equals)
+          PostgresChangeFilterType.neq    →   !=     (not equals)
+          PostgresChangeFilterType.lt     →   <      (less than)
+          PostgresChangeFilterType.lte    →   <=     (less than or equal)
+          PostgresChangeFilterType.gt     →   >      (greater than)
+          PostgresChangeFilterType.gte    →   >=     (greater than or equal)
+          PostgresChangeFilterType.in_    →   IN()   (value exists in a list)
+          This are the list of filter type you can use to filter based on the conditions
+          */
+
+            type: PostgresChangeFilterType.eq,
+            column: 'User_id', // Which column to apply the filter condition, in this case we are checking for the (User_id) column.
+            value: supabase.auth.currentUser!.id), // Check for this user_id. which is store in the browser's local storage
+          callback: (payload) async { 
+          // Fires for every matching event and contain three JSON objects in the payload parameter:
+          // payload.eventType → which operation (INSERT/UPDATE/DELETE)
+          // payload.newRecord → row after change (empty on DELETE)
+          // payload.oldRecord → row before change (empty on INSERT)       
             if (!mounted) return;
 
-            // ✅ 1. Background sync to keep sembast consistent
+            // 1. Background sync to keep sembast consistent
             unawaited(_table.pullTasksFromSupabase());
 
-            // ✅ 2. Parse the websocket payload for immediate UI update
+            // 2. Parse the websocket payload for immediate UI update
             final eventType = payload.eventType;
             final newRecord = payload.newRecord;
             final oldRecord = payload.oldRecord;
 
             setState(() {
-              if (eventType == PostgresChangeEvent.insert && newRecord.isNotEmpty) {
-                // ✅ FIX: Use fromSupabaseMap instead of fromJson
-                final newTask = TaskModel.fromSupabaseMap(newRecord);
+              if (eventType == PostgresChangeEvent.insert && newRecord.isNotEmpty) { //Check for the insert event it means new task is added 
+                // FIX: Use fromSupabaseMap instead of fromJson
+                final newTask = TaskModel.fromSupabaseMap(newRecord); // Convert the (new record) to a TaskModel object using the (fromSupabaseMap) constructor
 
                 // Prevent duplicates
                 tasks.removeWhere((t) => t.taskId == newTask.taskId);
                 tasks.add(newTask);
-              } else if (eventType == PostgresChangeEvent.update && newRecord.isNotEmpty) {
-                // ✅ FIX: Use fromSupabaseMap
-                final updatedTask = TaskModel.fromSupabaseMap(newRecord);
+              } 
+              else if (eventType == PostgresChangeEvent.update && newRecord.isNotEmpty) { // Check for the update event it means existing task is changed
+                // FIX: Use fromSupabaseMap
+                final updatedTask = TaskModel.fromSupabaseMap(newRecord); // Convert the (new record) to a TaskModel object using the (fromSupabaseMap) constructor
 
-                int index = tasks.indexWhere((t) => t.taskId == updatedTask.taskId);
-                if (index != -1) {
+                int index = tasks.indexWhere((t) => t.taskId == updatedTask.taskId); // Get the (index of that task) from the sembast using the [taskId] to match the [updated task]
+                if (index != -1) { // If the task is found in the local list, update it
                   tasks[index] = updatedTask;
-                } else {
-                  // Task wasn't in local list, add it
+                } else {// task_id wasn't in local list, add it
                   tasks.add(updatedTask);
                 }
               } else if (eventType == PostgresChangeEvent.delete && oldRecord.isNotEmpty) {
-                // ✅ FIX: Use Task_id to match your Supabase column name
+                // FIX: Use Task_id to match your Supabase column name
                 final targetId = oldRecord['Task_id'];
                 tasks.removeWhere((t) => t.taskId == targetId);
               }
 
-              // ✅ 3. Re-apply current filter and update count
+              // 3. Re-apply current filter and update count
               _filter(selectedFilter, searchKeyword, category);
             });
           },
-        )
-        .subscribe();
+        ).subscribe(); // Make the channel active and start listening for changes in the internet. If you don't call this method, the channel will not receive any events.
   }
 
   @override
