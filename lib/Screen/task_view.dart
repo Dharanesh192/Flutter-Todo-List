@@ -17,7 +17,7 @@ class Taskview extends StatefulWidget {
 }
 
 class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
-  final _table = TaskRepository();
+  final _functions = TaskRepository();
   List<TaskModel> tasks = [];
   List<TaskModel> filtertask = [];
   List<TaskModel> pendingtasks = [];
@@ -33,7 +33,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
 
 
   Future<void> taskdata() async {
-    tasks = await _table.getAllTasks();
+    tasks = await _functions.getAllTasks();
     _filter(selectedFilter, searchKeyword, category);
     WidgetsBinding.instance.scheduleFrame();
   }
@@ -189,42 +189,42 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
           // payload.oldRecord → row before change (empty on INSERT)       
             if (!mounted) return;
 
-            // 1. Background sync to keep sembast consistent
-            unawaited(_table.pullTasksFromSupabase());
-
             // 2. Parse the websocket payload for immediate UI update
             final eventType = payload.eventType;
             final newRecord = payload.newRecord;
             final oldRecord = payload.oldRecord;
 
-            setState(() {
-              if (eventType == PostgresChangeEvent.insert && newRecord.isNotEmpty) { //Check for the insert event it means new task is added 
-                // FIX: Use fromSupabaseMap instead of fromJson
+            if (eventType == PostgresChangeEvent.insert && newRecord.isNotEmpty) 
+              { //Check for the insert event it means new task is added 
                 final newTask = TaskModel.fromSupabaseMap(newRecord); // Convert the (new record) to a TaskModel object using the (fromSupabaseMap) constructor
-
-                // Prevent duplicates
-                tasks.removeWhere((t) => t.taskId == newTask.taskId);
-                tasks.add(newTask);
+                await _functions.addlivedata(newTask); // Pass data to this function
+                if (!mounted) return;
+                taskdata();
               } 
-              else if (eventType == PostgresChangeEvent.update && newRecord.isNotEmpty) { // Check for the update event it means existing task is changed
-                // FIX: Use fromSupabaseMap
+              
+              else if (eventType == PostgresChangeEvent.update && newRecord.isNotEmpty) 
+              { // Check for the update event it means existing task is changed
                 final updatedTask = TaskModel.fromSupabaseMap(newRecord); // Convert the (new record) to a TaskModel object using the (fromSupabaseMap) constructor
-
-                int index = tasks.indexWhere((t) => t.taskId == updatedTask.taskId); // Get the (index of that task) from the sembast using the [taskId] to match the [updated task]
+                final index = tasks.indexWhere((t) => t.taskId == updatedTask.taskId); // Get the (index of that task) from the sembast using the [taskId] to match the [updated task]
                 if (index != -1) { // If the task is found in the local list, update it
-                  tasks[index] = updatedTask;
-                } else {// task_id wasn't in local list, add it
-                  tasks.add(updatedTask);
+                  await _functions.livedataupdate(updatedTask); // Pass data to this function
+                } else {
+                  await _functions.addlivedata(updatedTask); // The (await) is used to run the function and hold the next line until that function is completed.
                 }
-              } else if (eventType == PostgresChangeEvent.delete && oldRecord.isNotEmpty) {
-                // FIX: Use Task_id to match your Supabase column name
-                final targetId = oldRecord['Task_id'];
-                tasks.removeWhere((t) => t.taskId == targetId);
+                if (!mounted) return;
+                taskdata();
               }
 
-              // 3. Re-apply current filter and update count
-              _filter(selectedFilter, searchKeyword, category);
-            });
+               else if (eventType == PostgresChangeEvent.delete && oldRecord.isNotEmpty) 
+              {
+                final targetId = oldRecord['Task_id'];
+                await _functions.livedelete(targetId); // Pass data to this function
+                if (!mounted) return;
+                taskdata();
+              }
+              
+            // Background sync to keep sembast consistent and Ensures Sembast stays consistent
+            unawaited(_functions.pullTasksFromSupabase()); // the (unawaited) is used to trigger the function in background without pausing the main thread.
           },
         ).subscribe(); // Make the channel active and start listening for changes in the internet. If you don't call this method, the channel will not receive any events.
   }
@@ -282,9 +282,9 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                 )
               : Column(children:[
                 const SizedBox(height: 10),
-                Expanded(child: /* Must use Expanded as its parent. Because Listview is rollable so it ask inifinite height from its parent widget,
+                Expanded(child: 
+                /* Must use Expanded as its parent. Because Listview is rollable so it ask inifinite height from its parent widget,
                 for this one Expanded is used to give it a fixed height if we use column it depends the child height so then it show nothing */
-                
                   ListView.builder(
                     itemCount: pendingtasks.length  + 1 + (_completetask ? completedtasks.length : 0),
                     itemBuilder: (context, index) {
@@ -363,7 +363,18 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                                   setState(() {
                                     filtertask[index].isComplete = !filtertask[index].isComplete;
                                   });
-                                  await _table.completeTask(TaskModel(taskId: filtertask[index].taskId, taskName: filtertask[index].taskName, priority: filtertask[index].priority, createdAt: filtertask[index].createdAt, updatedAt: filtertask[index].updatedAt, deadline: filtertask[index].deadline, category: filtertask[index].category, isComplete: filtertask[index].isComplete, isSynced: filtertask[index].isSynced, userId: filtertask[index].userId));
+                                  await _functions.completeTask(TaskModel
+                                  (taskId: filtertask[index].taskId,
+                                    taskName: filtertask[index].taskName,
+                                    priority: filtertask[index].priority,
+                                    createdAt: filtertask[index].createdAt,
+                                    updatedAt: DateTime.now(),
+                                    deadline: filtertask[index].deadline,
+                                    category: filtertask[index].category,
+                                    isComplete: filtertask[index].isComplete,
+                                    isSynced: filtertask[index].isSynced,
+                                    userId: filtertask[index].userId)
+                                  );
                                   taskdata();
                                 },
                               ),
@@ -469,7 +480,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                                         completedtasks = filtertask.where((task) => task.isComplete).toList();
                                       });
                                       try {
-                                        await _table.deleteTask(removedtask.taskId); // Delete the task from the database
+                                        await _functions.deleteTask(removedtask.taskId); // Delete the task from the database
                                       } catch (e) {
                                         setState(() {
                                           filtertask.insert(index, removedtask); // Revert the UI change if deletion fails

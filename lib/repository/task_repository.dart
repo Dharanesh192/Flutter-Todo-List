@@ -30,7 +30,8 @@ class TaskRepository
     {
       _db = await databaseFactoryWeb.openDatabase('tasks.db'); // declare the database in the bulid-in browser database (IndexedDB)
     } 
-    else { // If the application runs in moblie
+    else 
+    { // If the application runs in moblie
       final appDir = await getApplicationDocumentsDirectory(); //Get the internal storage path as (/data/data/com.Task_Managment/app_flutter/tasks_data.db) which is not directly visible in file manager
       final dbPath = join(appDir.path, 'tasks_data.db'); //Append the appdir path with tasks (Internal storage/Android/Data/tasks_data)
       _db = await databaseFactoryIo.openDatabase(dbPath); // Declare the database in the provided path
@@ -163,7 +164,7 @@ class TaskRepository
                   that repectly call 
                   like for loop.  
     */
-}
+  }
 
   Future<void> pullTasksFromSupabase() async {
     if (_supabase.auth.currentUser == null) return;
@@ -179,7 +180,8 @@ class TaskRepository
             if (task.updatedAt.isAfter(localTask.updatedAt)) {
               await _table.record(task.taskId).put(db, task.toMap());
             }
-          } else {
+          } 
+          else {
             await _table.record(task.taskId).put(db, task.toMap());
           }
         } catch (e) {
@@ -215,4 +217,23 @@ class TaskRepository
     await _table.delete(db,finder: task); // Then delete the user task from the local database (sembast) and the guest task will remain in the local database
   }
 
+  // Live data update functions
+  Future<void>addlivedata(TaskModel task)async{
+    final db = await dbcreation; // Check the database
+    final existingRecord = await _table.record(task.taskId).get(db); // Check if the task is already exist or not
+    if (existingRecord == null) { // if not add it
+      await _table.record(task.taskId).put(db, task.toMap());
+    }
+  }
+
+  Future<void>livedataupdate(TaskModel task) async{
+    final db = await dbcreation;
+    await _table.record(task.taskId).put(db, task.toMap()); // Rewrite the existing data
+  }
+
+  Future<void> livedelete(String taskId) async{
+    final db = await dbcreation;
+    await _table.record(taskId).delete(db); // Delete the task from the local database
   }  
+  
+}
