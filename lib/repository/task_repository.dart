@@ -57,6 +57,7 @@ class TaskRepository
     if (connectivity != ConnectivityResult.none) { // If the internet connected
       await _syncTask(task); // It call the Synctask function
     }
+ 
   }
 
   // Edit Task
@@ -71,6 +72,7 @@ class TaskRepository
     if (connectivity != ConnectivityResult.none) {
       await _syncTask(task); // Sync to the supabase if internet available
     }
+ 
   }
 
   // Sync single task to Supabase
@@ -90,6 +92,7 @@ class TaskRepository
     } catch (e) {
       debugPrint('Sync failed: $e'); // isSynced stays false — will retry later and tells what goes wrong
     }
+ 
   }
 
   // ✅ Sync all pending tasks (called when internet returns)
@@ -107,20 +110,19 @@ class TaskRepository
     {
       await _syncTask(task);
     }
+ 
   }
 
   // Delete task
   Future<void> deleteTask(String taskId) async { // In this function it comes with a task ID 
     final db = await dbcreation;
-
     await _table.record(taskId).delete(db); // Delete that task from sembast
-
-    
     final connectivity = await Connectivity().checkConnectivity();
     if (connectivity != ConnectivityResult.none) // Delete from Supabase if internet available
      {
       await _supabase.from('focus_hub').delete().eq('Task_id', taskId); // It means from the table focus_hub delete a task which task ID is equal to the given task_ID
     }
+ 
   }
 
   // Complete task
@@ -135,6 +137,7 @@ class TaskRepository
     if (connectivity != ConnectivityResult.none) {
       await _syncTask(task); // Sync to the supabase if internet available
     }
+ 
   }
 
   // Get all tasks
@@ -191,6 +194,7 @@ class TaskRepository
     } catch (e) {
       debugPrint('pull failed: $e');
     }
+ 
   }
 
   // Get the guset task
@@ -214,26 +218,29 @@ class TaskRepository
   Future<void> deleteusertask()async {
     final db = await dbcreation;
     final task = Finder(filter: Filter.notNull('userId')); // Filter the task with usedID which is create by a user
-    await _table.delete(db,finder: task); // Then delete the user task from the local database (sembast) and the guest task will remain in the local database
+    await _table.delete(db,finder: task);
+  // Then delete the user task from the local database (sembast) and the guest task will remain in the local database
   }
 
   // Live data update functions
+
   Future<void>addlivedata(TaskModel task)async{
     final db = await dbcreation; // Check the database
     final existingRecord = await _table.record(task.taskId).get(db); // Check if the task is already exist or not
     if (existingRecord == null) { // if not add it
       await _table.record(task.taskId).put(db, task.toMap());
     }
+ 
   }
-
-  Future<void>livedataupdate(TaskModel task) async{
+  Future<void> livedataupdate(TaskModel task) async{
     final db = await dbcreation;
     await _table.record(task.taskId).put(db, task.toMap()); // Rewrite the existing data
   }
 
   Future<void> livedelete(String taskId) async{
     final db = await dbcreation;
-    await _table.record(taskId).delete(db); // Delete the task from the local database
+    await _table.record(taskId).delete(db);
+  // Delete the task from the local database
   }  
   
 }

@@ -217,8 +217,8 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
 
                else if (eventType == PostgresChangeEvent.delete && oldRecord.isNotEmpty) 
               {
-                final targetId = oldRecord['Task_id'];
-                await _functions.livedelete(targetId); // Pass data to this function
+                final target = TaskModel.fromSupabaseMap(oldRecord);
+                await _functions.livedelete(target.taskId); // Pass data to this function
                 if (!mounted) return;
                 taskdata();
               }
