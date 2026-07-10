@@ -237,10 +237,17 @@ class TaskRepository
     await _table.record(task.taskId).put(db, task.toMap()); // Rewrite the existing data
   }
 
-  Future<void> livedelete(String taskId) async{
+  Future<void> livedelete() async{
     final db = await dbcreation;
-    await _table.record(taskId).delete(db);
-  // Delete the task from the local database
-  }  
+    final supabase = await _supabase.from('focus_hub').select('Task_id').eq('User_id', _supabase.auth.currentUser!.id);
+    final remoteIds = supabase.map((row) => row['Task_id'] as String).toList();
+    final all = await _table.find(db); // Get all the task from the local database
+    final semtoobbj = all.map((r) => TaskModel.fromMap(r.value)).toList(); // Convert the list of map data in the records into the list of task model data and store it in the semtoobbj variable
+    final local = semtoobbj.map((r) => r.taskId).toList(); // Get all the task ID from the local database and store it in the local variable
+    final result = local.where((item) => !remoteIds.contains(item)).toList();
+    for (var id in result) {
+      await _table.record(id).delete(db); // Delete the task from the local database which is not in the supabase
+    }
+  }   
   
 }

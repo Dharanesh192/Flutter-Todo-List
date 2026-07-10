@@ -192,7 +192,6 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
             // 2. Parse the websocket payload for immediate UI update
             final eventType = payload.eventType;
             final newRecord = payload.newRecord;
-            final oldRecord = payload.oldRecord;
 
             if (eventType == PostgresChangeEvent.insert && newRecord.isNotEmpty) 
               { //Check for the insert event it means new task is added 
@@ -215,10 +214,9 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                 taskdata();
               }
 
-               else if (eventType == PostgresChangeEvent.delete && oldRecord.isNotEmpty) 
+               else if (eventType == PostgresChangeEvent.delete) 
               {
-                final target = TaskModel.fromSupabaseMap(oldRecord);
-                await _functions.livedelete(target.taskId); // Pass data to this function
+                _functions.livedelete();
                 if (!mounted) return;
                 taskdata();
               }
