@@ -218,7 +218,8 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                else if (eventType == PostgresChangeEvent.delete && oldrecord.isNotEmpty) 
               {
                 final record = TaskModel.fromSupabaseMap(oldrecord); // Change it into the object type
-                _functions.livedelete(record); // Pass the object to this function
+                debugPrint('Deleted task: ${record.taskName} and ${record.taskId}'); // Print the deleted task name in the console for debugging purposes
+                _functions.livedelete(record.taskId); // Pass the object to this function
                 if (!mounted) return;
                 taskdata(); // Refresh the UI after deleting the task
               }
@@ -293,7 +294,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                           margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(36, 40, 48, 0.55),
+                            color: _completetask ? Color.fromRGBO(36, 40, 48, 0.55) : Color.fromRGBO(36, 40, 48, 0.7),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color:  Colors.white54,
