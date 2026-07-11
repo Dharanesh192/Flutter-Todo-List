@@ -219,7 +219,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
               {
                 final record = TaskModel.fromSupabaseMap(oldrecord); // Change it into the object type
                 debugPrint('Deleted task: ${record.taskName} and ${record.taskId}'); // Print the deleted task name in the console for debugging purposes
-                _functions.livedelete(record.taskId); // Pass the object to this function
+                _functions.deleteTask(record.taskId); // Pass the object to this function
                 if (!mounted) return;
                 taskdata(); // Refresh the UI after deleting the task
               }
