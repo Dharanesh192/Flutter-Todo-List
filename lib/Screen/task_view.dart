@@ -23,6 +23,9 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
   List<TaskModel> pendingtasks = [];
   List<TaskModel> completedtasks = [];  
   DateTime currentDate = DateTime.now();
+  String filterwork = 'All';
+  String searchword = '';
+  bool categorycheck = false;
   late Timer _timer;
   bool _completetask = false;
   RealtimeChannel? _channel;
@@ -31,11 +34,11 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
 
   Future<void> taskdata() async {
     tasks = await _functions.getAllTasks();
-    filter('All', '', false);
+    filter(filterwork, searchword, categorycheck);
     WidgetsBinding.instance.scheduleFrame();
   }
 
-  void filter(String filter, String keyword, bool iscategory) {
+  void filter(String filter, String keyword, bool iscategory)  {
     setState(() {
       var temp = tasks;
 
@@ -62,7 +65,9 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
       filtertask = temp;
       pendingtasks = filtertask.where((task) => !task.isComplete).toList();
       completedtasks = filtertask.where((task) => task.isComplete).toList();
-
+      filterwork = filter;
+      searchword = keyword;
+      categorycheck = iscategory;
     });
   }
 
@@ -284,7 +289,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                           margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: _completetask ? Color.fromRGBO(19, 21, 25, 1) : Color.fromRGBO(36, 40, 48, 0.5),
+                            color: _completetask ? Color.fromRGBO(99, 105, 118, 0.5) : Color.fromRGBO(36, 40, 48, 0.5),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color:  Colors.white54,
@@ -472,6 +477,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                                       });
                                       try {
                                         await _functions.deleteTask(removedtask.taskId); // Delete the task from the database
+                                        taskdata();
                                       } catch (e) {
                                         setState(() {
                                           filtertask.insert(index, removedtask); // Revert the UI change if deletion fails

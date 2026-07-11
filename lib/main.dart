@@ -68,6 +68,7 @@ class _Homepagestate extends State<Homepage> {
                   onPressed: () => Navigator.pop(context),
                   child: const Text("Maybe later", style: TextStyle(color: Colors.white54)),
                 ),
+                SizedBox(width: 10),
                 TextButton(
                   style: TextButton.styleFrom(backgroundColor: Color(0xFF00FF00)),
                   onPressed: () async {
@@ -295,11 +296,7 @@ class _Homepagestate extends State<Homepage> {
 
                             child: Center(
                               child: Text(
-                                activeFilter != null
-                                    ? activeFilter == 'All'
-                                          ? 'Filter By'
-                                          : activeFilter!
-                                    : 'Filter By',
+                                activeFilter != null ? activeFilter == 'All' ? 'Filter By': activeFilter!: 'Filter By',
                                 style: TextStyle(color: Colors.white54, fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -313,7 +310,6 @@ class _Homepagestate extends State<Homepage> {
                         onPressed: () => {
                           setState(() {
                             iscategory ? iscategory = false : iscategory = true;
-                            _taskviewkey.currentState?.taskdata();
                             _taskviewkey.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
                           }),
                         },
@@ -379,7 +375,6 @@ class _Homepagestate extends State<Homepage> {
               // ✅ if statement trigger after task added
               if (added == true) {
                 _taskviewkey.currentState?.taskdata(); // Call the loadTasks function in TaskviewState to refresh the task list after adding a new task
-                _taskviewkey.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
                 setState(() {});
                 await _checkTaskCount(context); // ← trigger check
               }
