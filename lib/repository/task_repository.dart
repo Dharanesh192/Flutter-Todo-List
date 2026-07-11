@@ -235,6 +235,11 @@ class TaskRepository
   Future<void> livedataupdate(TaskModel task) async{
     final db = await dbcreation;
     await _table.record(task.taskId).put(db, task.toMap()); // Rewrite the existing data
+  }
+
+  Future<void> livedelete(String task) async{
+    final db = await dbcreation;
+    await _table.record(task).delete(db); // Delete the task from the local database which is not in the supabase
   }   
   
 }
