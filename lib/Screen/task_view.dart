@@ -24,9 +24,6 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
   List<TaskModel> completedtasks = [];  
   DateTime currentDate = DateTime.now();
   late Timer _timer;
-  String selectedFilter = 'All';
-  String searchKeyword = '';
-  bool category = false;
   bool _completetask = false;
   RealtimeChannel? _channel;
   StreamSubscription? _visibilitySubscription;
@@ -34,18 +31,11 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
 
   Future<void> taskdata() async {
     tasks = await _functions.getAllTasks();
-    _filter(selectedFilter, searchKeyword, category);
+    filter('All', '', false);
     WidgetsBinding.instance.scheduleFrame();
   }
 
-  void search(String filter, String keyword, bool iscategory) {
-    selectedFilter = filter;
-    searchKeyword = keyword;
-    category = iscategory;
-    _filter(selectedFilter, searchKeyword, category);
-  }
-
-  void _filter(String filter, String keyword, bool iscategory) {
+  void filter(String filter, String keyword, bool iscategory) {
     setState(() {
       var temp = tasks;
 
@@ -64,7 +54,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
       
       // Check the category is turned on / off
       if (iscategory) { // Seacrh in category
-        temp = temp.where((task) => task.category != null ? task.category!.toLowerCase().contains(keyword.toLowerCase()/*The contains keyword is used to check if the charaters in the left string match with the right string and return them*/) : false).toList();
+        temp = temp.where((task) => task.category != null ? task.category!.toLowerCase().contains(keyword.toLowerCase()) : false).toList(); /*The contains keyword is used to check if the charaters in the left string match with the right string and return them*/
       } else { // Seacrh in the task name
         temp = temp.where((task) => task.taskName.toLowerCase().contains(keyword.toLowerCase())).toList();
       }
@@ -219,7 +209,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
               {
                 final taskid = oldrecord['Task_id'] as String; // Change it into the object type
                 debugPrint('Deleted task: and $taskid'); // Print the deleted task name in the console for debugging purposes
-                _functions.livedelete(taskid); // Pass the object to this function
+                await _functions.livedelete(taskid); // Pass the object to this function and wait for it to complete
                 if (!mounted) return;
                 taskdata(); // Refresh the UI after deleting the task
               }
@@ -294,7 +284,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                           margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: _completetask ? Color.fromRGBO(36, 40, 48, 0.55) : Color.fromRGBO(36, 40, 48, 1),
+                            color: _completetask ? Color.fromRGBO(19, 21, 25, 1) : Color.fromRGBO(36, 40, 48, 0.5),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color:  Colors.white54,

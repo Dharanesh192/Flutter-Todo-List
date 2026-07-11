@@ -229,7 +229,7 @@ class _Homepagestate extends State<Homepage> {
                         controller: inputdata,
                         onChanged: (value) {
                           keyword = value; // Update the search keyword whenever the user types in the search bar
-                          _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '', iscategory);
+                          _taskviewkey.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
                         },
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.search, color: Colors.white54),
@@ -289,7 +289,7 @@ class _Homepagestate extends State<Homepage> {
                                 activeFilter = activeFilter == value ? null : value; // toggle off if same
                                 keyword = ''; // Clear the search keyword when a filter is selected
                                 inputdata.clear(); // Clear the search bar when a filter is selected
-                                _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '', iscategory); // Call the filter function in TaskviewState to filter the task list based on the selected priority
+                                _taskviewkey.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory); // Call the filter function in TaskviewState to filter the task list based on the selected priority
                               });
                             },
 
@@ -314,7 +314,7 @@ class _Homepagestate extends State<Homepage> {
                           setState(() {
                             iscategory ? iscategory = false : iscategory = true;
                             _taskviewkey.currentState?.taskdata();
-                            _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '', iscategory);
+                            _taskviewkey.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
                           }),
                         },
                         style: ElevatedButton.styleFrom(fixedSize: const Size.fromHeight(48), backgroundColor: iscategory == false ? Color.fromARGB(255, 22, 27, 34) : Colors.white, foregroundColor: Colors.transparent),
@@ -379,7 +379,7 @@ class _Homepagestate extends State<Homepage> {
               // ✅ if statement trigger after task added
               if (added == true) {
                 _taskviewkey.currentState?.taskdata(); // Call the loadTasks function in TaskviewState to refresh the task list after adding a new task
-                _taskviewkey.currentState?.search(activeFilter ?? 'All', keyword ?? '', iscategory);
+                _taskviewkey.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
                 setState(() {});
                 await _checkTaskCount(context); // ← trigger check
               }
