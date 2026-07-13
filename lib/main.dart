@@ -144,8 +144,8 @@ class _Homepagestate extends State<Homepage> {
     });
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) async {
       if (result != ConnectivityResult.none && isLoggedIn) { // get the status of the internet if internet is connected and user logged in
-        await _repository.syncPendingTasks(); // Sync the non syned pending task
         await _repository.pullTasksFromSupabase(); // To update the local database (sembast) from the supabase. If the user may do anything in the other device
+        await _repository.syncPendingTasks(); // Sync the non syned pending task
         _taskviewkey.currentState?.taskdata(); // refresh the tasklist
       }
     });

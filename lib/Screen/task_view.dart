@@ -243,7 +243,6 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     taskdata();
     _midnighttimer(); // Start the midnight timer
-    listenRealtime();
     _setupVisibilityListener();
     currentDate = DateTime.now(); // Initialize currentDate with the current date
   }
