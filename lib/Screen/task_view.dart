@@ -256,6 +256,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
     _timer.cancel(); // Cancel the timer when the widget is disposed
     WidgetsBinding.instance.removeObserver(this);
     _visibilitySubscription?.cancel();
+    listenRealtime();
     super.dispose();
   }
 

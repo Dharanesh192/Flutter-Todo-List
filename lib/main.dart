@@ -87,20 +87,22 @@ class _Homepagestate extends State<Homepage> {
 
   @override
   void initState() {
-    super.initState();
-    _authSubscription = _supabase.auth.onAuthStateChange.listen((data) async {
+    super.initState(); // This function will be start first at main.dart file call
+    _authSubscription = _supabase.auth.onAuthStateChange.listen((data) async { // Get the auth state details that cantains only (event and session) in JSON 
       if (data.event == AuthChangeEvent.tokenRefreshed || data.event == AuthChangeEvent.signedIn) {
-        if (data.session == null) return;
+        /* If it is signin event) -> (New usr) or (tokenrefreshed event) -> (old user agin open the app / old user ID is used from the storage ) then */
 
+        if (data.session == null) return;
         setState(() {}); // ← update UI immediately (avatar appears now)
+        
         Future.delayed(Duration.zero, () async {
           if (!mounted) return;
-          _taskviewkey.currentState?.listenRealtime(); // ← start listening to realtime changes immediately (sync happens now if there are any pending tasks or if the user logged in from another device)
-          if (!(await _repository.guesttask())) {
-            // show snackbar at bottom
-            ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
+          _taskviewkey.currentState?.listenRealtime(); // ← start the websocket
+
+          if (!(await _repository.guesttask())) { // Check they is any guest task are in sembast if not (no guest task) run this
+            ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar( // show snackbar at bottom
               SnackBar(
-                duration: Duration(minutes: 1),
+                duration: Duration(minutes: 1),// For max of 1 minute
                 backgroundColor: Color.fromARGB(255, 22, 27, 34),
                 content: Row(
                   children: [
@@ -111,14 +113,13 @@ class _Homepagestate extends State<Homepage> {
                 ),
               ),
             );
-
-            await _repository.pullTasksFromSupabase();
-            // hide snackbar after done
-            ScaffoldMessenger.of(_navigatorKey.currentContext!).hideCurrentSnackBar();
-            await _taskviewkey.currentState?.taskdata();
-            return;
+            await _repository.pullTasksFromSupabase(); // Call this function
+            ScaffoldMessenger.of(_navigatorKey.currentContext!).hideCurrentSnackBar(); // hide snackbar after done
+            await _taskviewkey.currentState?.taskdata(); // refresh the UI 
+            return; // To stop the code after this no line will execute
           }
-          await showDialog(
+
+          await showDialog( // This will show when they is a guest task
             context: _navigatorKey.currentContext!,
             builder: (context) => Dialog(
               backgroundColor: Color.fromARGB(255, 13, 17, 23),
@@ -126,14 +127,14 @@ class _Homepagestate extends State<Homepage> {
                 borderRadius: BorderRadius.circular(15),
                 side: BorderSide(color: Colors.white),
               ),
-              child: SizedBox(height: MediaQuery.of(context).size.height < 450 ? 350 : 400, width: MediaQuery.of(context).size.width < 450 ? double.infinity : 400, child: Syncscreen()),
+              child: SizedBox(height: MediaQuery.of(context).size.height < 450 ? 350 : 400, width: MediaQuery.of(context).size.width < 450 ? double.infinity : 400, child: Syncscreen()), // Call this syncscreen() class to get the user opinion to sync or not the guest task
             ),
           );
-          await _taskviewkey.currentState?.taskdata(); // ← refresh tasks after sync
+          await _taskviewkey.currentState?.taskdata(); // refresh tasks after sync
         });
       }
 
-      if (data.event == AuthChangeEvent.signedOut) {
+      if (data.event == AuthChangeEvent.signedOut) { // Trigger when the user logout
         Future.delayed(Duration(milliseconds: 500), () {
           if (!mounted) return;
           setState(() {}); // this was already immediate, should be fine
@@ -142,9 +143,10 @@ class _Homepagestate extends State<Homepage> {
       }
     });
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) async {
-      if (result != ConnectivityResult.none && isLoggedIn) {
-        await _repository.syncPendingTasks();
-        _taskviewkey.currentState?.taskdata();
+      if (result != ConnectivityResult.none && isLoggedIn) { // get the status of the internet if internet is connected and user logged in
+        await _repository.syncPendingTasks(); // Sync the non syned pending task
+        await _repository.pullTasksFromSupabase(); // To update the local database (sembast) from the supabase. If the user may do anything in the other device
+        _taskviewkey.currentState?.taskdata(); // refresh the tasklist
       }
     });
   }

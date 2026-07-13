@@ -335,9 +335,8 @@ class SyncscreenState extends State<Syncscreen> {
               ),
             ),
             const SizedBox(height: 60),
-            _isLoading
-                ? const CircularProgressIndicator(color: Color(0xFF00FF00))
-                : Row(
+            _isLoading ? const CircularProgressIndicator(color: Color(0xFF00FF00))
+            : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton.icon(
