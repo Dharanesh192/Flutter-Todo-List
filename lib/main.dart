@@ -26,7 +26,7 @@ class Homepage extends StatefulWidget {
 }
 
 class _Homepagestate extends State<Homepage> {
-  final _taskviewkey = GlobalKey<TaskviewState>(); // Create a global key to access the TaskviewState and refresh the UI after adding a task
+  final _taskview = GlobalKey<TaskviewState>(); // Create a global key to access the TaskviewState and refresh the UI after adding a task
   final TextEditingController inputdata = TextEditingController();
   final _supabase = Supabase.instance.client;
   final _repository = TaskRepository();
@@ -97,7 +97,7 @@ class _Homepagestate extends State<Homepage> {
         
         Future.delayed(Duration.zero, () async {
           if (!mounted) return;
-          _taskviewkey.currentState?.listenRealtime(); // ← start the websocket
+          _taskview.currentState?.listenRealtime(); // ← start the websocket
 
           if (!(await _repository.guesttask())) { // Check they is any guest task are in sembast if not (no guest task) run this
             ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar( // show snackbar at bottom
@@ -115,7 +115,7 @@ class _Homepagestate extends State<Homepage> {
             );
             await _repository.pullTasksFromSupabase(); // Call this function
             ScaffoldMessenger.of(_navigatorKey.currentContext!).hideCurrentSnackBar(); // hide snackbar after done
-            await _taskviewkey.currentState?.taskdata(); // refresh the UI 
+            await _taskview.currentState?.taskdata(); // refresh the UI 
             return; // To stop the code after this no line will execute
           }
 
@@ -130,7 +130,7 @@ class _Homepagestate extends State<Homepage> {
               child: SizedBox(height: MediaQuery.of(context).size.height < 450 ? 350 : 400, width: MediaQuery.of(context).size.width < 450 ? double.infinity : 400, child: Syncscreen()), // Call this syncscreen() class to get the user opinion to sync or not the guest task
             ),
           );
-          await _taskviewkey.currentState?.taskdata(); // refresh tasks after sync
+          await _taskview.currentState?.taskdata(); // refresh tasks after sync
         });
       }
 
@@ -138,15 +138,13 @@ class _Homepagestate extends State<Homepage> {
         Future.delayed(Duration(milliseconds: 500), () {
           if (!mounted) return;
           setState(() {}); // this was already immediate, should be fine
-          _taskviewkey.currentState?.taskdata();
+          _taskview.currentState?.taskdata();
         });
       }
     });
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) async {
       if (result != ConnectivityResult.none && isLoggedIn) { // get the status of the internet if internet is connected and user logged in
-        await _repository.pullTasksFromSupabase(); // To update the local database (sembast) from the supabase. If the user may do anything in the other device
-        await _repository.syncPendingTasks(); // Sync the non syned pending task
-        _taskviewkey.currentState?.taskdata(); // refresh the tasklist
+        _taskview.currentState?.datarefresh();
       }
     });
   }
@@ -157,6 +155,7 @@ class _Homepagestate extends State<Homepage> {
     inputdata.dispose();
     iscategory = false; // Reset the category filter when the widget is disposed
     _connectivitySubscription.cancel();
+    _taskview.currentState?.listenRealtime();
     super.dispose();
   }
 
@@ -232,7 +231,7 @@ class _Homepagestate extends State<Homepage> {
                         controller: inputdata,
                         onChanged: (value) {
                           keyword = value; // Update the search keyword whenever the user types in the search bar
-                          _taskviewkey.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
+                          _taskview.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
                         },
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.search, color: Colors.white54),
@@ -292,7 +291,7 @@ class _Homepagestate extends State<Homepage> {
                                 activeFilter = activeFilter == value ? null : value; // toggle off if same
                                 keyword = ''; // Clear the search keyword when a filter is selected
                                 inputdata.clear(); // Clear the search bar when a filter is selected
-                                _taskviewkey.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory); // Call the filter function in TaskviewState to filter the task list based on the selected priority
+                                _taskview.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory); // Call the filter function in TaskviewState to filter the task list based on the selected priority
                               });
                             },
 
@@ -312,7 +311,7 @@ class _Homepagestate extends State<Homepage> {
                         onPressed: () => {
                           setState(() {
                             iscategory ? iscategory = false : iscategory = true;
-                            _taskviewkey.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
+                            _taskview.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
                           }),
                         },
                         style: ElevatedButton.styleFrom(fixedSize: const Size.fromHeight(48), backgroundColor: iscategory == false ? Color.fromARGB(255, 22, 27, 34) : Colors.white, foregroundColor: Colors.transparent),
@@ -353,7 +352,7 @@ class _Homepagestate extends State<Homepage> {
                 },
               ),
 
-              Expanded(child: Taskview(key: _taskviewkey)),
+              Expanded(child: Taskview(key: _taskview)),
             ],
           ),
         ),
@@ -376,7 +375,7 @@ class _Homepagestate extends State<Homepage> {
               );
               // ✅ if statement trigger after task added
               if (added == true) {
-                _taskviewkey.currentState?.taskdata(); // Call the loadTasks function in TaskviewState to refresh the task list after adding a new task
+                _taskview.currentState?.taskdata(); // Call the loadTasks function in TaskviewState to refresh the task list after adding a new task
                 setState(() {});
                 await _checkTaskCount(context); // ← trigger check
               }
