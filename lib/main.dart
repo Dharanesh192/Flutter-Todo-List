@@ -89,15 +89,27 @@ class _Homepagestate extends State<Homepage> {
   void initState() {
     super.initState(); // This function will be start first at main.dart file call
     _authSubscription = _supabase.auth.onAuthStateChange.listen((data) async { // Get the auth state details that cantains only (event and session) in JSON 
+
+      if(data.event == AuthChangeEvent.initialSession){
+        if(data.session == null) return;
+        Future.delayed(Duration.zero, () async{
+          if(!mounted) return;
+          await _repository.pullTasksFromSupabase();
+          await _taskview.currentState?.taskdata();
+          _taskview.currentState?.listenRealtime();
+          _repository.syncPendingTasks();
+        });
+        return;
+      }
+
       if (data.event == AuthChangeEvent.tokenRefreshed || data.event == AuthChangeEvent.signedIn) {
-        /* If it is signin event) -> (New usr) or (tokenrefreshed event) -> (old user agin open the app / old user ID is used from the storage ) then */
+        /* If it is (signin event) -> (New usr) or (tokenrefreshed event) -> (old user agin open the app / old user ID is used from the storage ) then */
 
         if (data.session == null) return;
         setState(() {}); // ← update UI immediately (avatar appears now)
         
         Future.delayed(Duration.zero, () async {
           if (!mounted) return;
-          _repository.pullTasksFromSupabase();
           _taskview.currentState?.listenRealtime(); // ← start the websocket
 
           if (!(await _repository.guesttask())) { // Check they is any guest task are in sembast if not (no guest task) run this

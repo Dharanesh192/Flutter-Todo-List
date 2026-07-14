@@ -160,7 +160,7 @@ class _LogscreenState extends State<Logscreen> {
     }
   }
 
-  Future<void> syncoutprocess() async {
+  Future<void> syncsignoutprocess() async {
     setState(() => _isLoading = true);
     try {
       await TaskRepository().pullTasksFromSupabase();
@@ -228,7 +228,7 @@ class _LogscreenState extends State<Logscreen> {
                   children: [
                     if (widget.method == false && guest)
                         ElevatedButton.icon(
-                          onPressed: syncoutprocess,
+                          onPressed: syncsignoutprocess,
                           icon: Icon(Icons.sync_rounded, color: Colors.black),
                           label: Text("Sync",
                             style: TextStyle(
