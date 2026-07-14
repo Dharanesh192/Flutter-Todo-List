@@ -95,6 +95,7 @@ class _Homepagestate extends State<Homepage> {
         Future.delayed(Duration.zero, () async{
           if(!mounted) return;
           await _repository.pullTasksFromSupabase();
+          debugPrint('This event is triggered');
           await _taskview.currentState?.taskdata();
           _taskview.currentState?.listenRealtime();
           _repository.syncPendingTasks();
