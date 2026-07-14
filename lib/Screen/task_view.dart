@@ -84,12 +84,6 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
     });
   }
 
-  void datarefresh() async{
-    await _functions.pullTasksFromSupabase(); // To update the local database (sembast) from the supabase. If the user may do anything in the other device
-    await _functions.syncPendingTasks(); // Sync the non syned pending task
-    taskdata(); // refresh the tasklist
-  }
-
   void _setupVisibilityListener() { // It is used to check visibility of the app in the (browser level like tab switching, window minimize, screen lock)
     if(kIsWeb) { // Check if the app is running in web. This line is checked in compile if the build is web then the code execute otherwise it will not execute in mobile or desktop otherwise it may cause error.
     _visibilitySubscription?.cancel(); // Cancel any existing subscription to avoid multiple listeners

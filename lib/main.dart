@@ -97,6 +97,7 @@ class _Homepagestate extends State<Homepage> {
         
         Future.delayed(Duration.zero, () async {
           if (!mounted) return;
+          _repository.pullTasksFromSupabase();
           _taskview.currentState?.listenRealtime(); // ← start the websocket
 
           if (!(await _repository.guesttask())) { // Check they is any guest task are in sembast if not (no guest task) run this
@@ -144,7 +145,7 @@ class _Homepagestate extends State<Homepage> {
     });
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) async {
       if (result != ConnectivityResult.none && isLoggedIn) { // get the status of the internet if internet is connected and user logged in
-        _taskview.currentState?.datarefresh();
+        _repository.syncPendingTasks();
       }
     });
   }
