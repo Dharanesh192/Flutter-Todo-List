@@ -88,14 +88,20 @@ class _Homepagestate extends State<Homepage> {
   @override
   void initState() {
     super.initState(); // This function will be start first at main.dart file call
+    debugPrint("The initstate is running ☑️");
     _authSubscription = _supabase.auth.onAuthStateChange.listen((data) async { // Get the auth state details that cantains only (event and session) in JSON 
-
+    debugPrint("The user ID -> ${data.session?.user.id}");
       if(data.event == AuthChangeEvent.initialSession){
-        if(data.session == null) return;
+        debugPrint("The event is trigger in initialsession");
+        if(data.session == null){
+          debugPrint("The data.session is empty");
+          return;
+          }
+
         Future.delayed(Duration.zero, () async{
           if(!mounted) return;
           await _repository.pullTasksFromSupabase();
-          debugPrint('This event is triggered');
+          debugPrint('The pull task function is triggered');
           await _taskview.currentState?.taskdata();
           _taskview.currentState?.listenRealtime();
           _repository.syncPendingTasks();
