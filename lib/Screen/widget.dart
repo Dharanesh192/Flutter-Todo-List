@@ -16,6 +16,7 @@ class Textstyler extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      autofocus: true,
       style: const TextStyle(color: Colors.white54),
       decoration: InputDecoration(
       hintText: hint,
