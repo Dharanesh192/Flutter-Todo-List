@@ -89,79 +89,154 @@ class _Homepagestate extends State<Homepage> {
   void initState() {
     super.initState(); // This function will be start first at main.dart file call
     debugPrint("The initstate is running ☑️");
-    _authSubscription = _supabase.auth.onAuthStateChange.listen((data) async { // Get the auth state details that cantains only (event and session) in JSON 
-    debugPrint("The user ID -> ${data.session?.user.id}");
-      if(data.event == AuthChangeEvent.initialSession){
-        debugPrint("The event is trigger in initialsession");
-        if(data.session == null){
-          debugPrint("The data.session is empty");
-          return;
-          }
+    _authSubscription = _supabase.auth.onAuthStateChange.listen((data) async {
+  
+  debugPrint('════════════════════════════════');
+  debugPrint('EVENT: ${data.event}');
+  debugPrint('SESSION NULL: ${data.session == null}');
+  debugPrint('USER ID: ${data.session?.user.id}');
+  debugPrint('NAVIGATOR CONTEXT NULL: ${_navigatorKey.currentContext == null}');
+  debugPrint('TASKVIEW STATE NULL: ${_taskview.currentState == null}');
+  debugPrint('TIME: ${DateTime.now().millisecondsSinceEpoch}');
+  debugPrint('════════════════════════════════');
 
-        Future.delayed(Duration.zero, () async{
-          if(!mounted) return;
-          await _repository.pullTasksFromSupabase();
-          debugPrint('The pull task function is triggered');
-          await _taskview.currentState?.taskdata();
-          _taskview.currentState?.listenRealtime();
-          _repository.syncPendingTasks();
-        });
+  if (data.event == AuthChangeEvent.initialSession) {
+    debugPrint('→ initialSession branch entered');
+    
+    if (data.session == null) {
+      debugPrint('→ session is null — guest user — returning');
+      return;
+    }
+    
+    debugPrint('→ session exists — scheduling pull');
+    
+    Future.delayed(Duration.zero, () async {
+      debugPrint('→ Future.delayed fired');
+      debugPrint('→ mounted: $mounted');
+      debugPrint('→ taskview state null: ${_taskview.currentState == null}');
+      debugPrint('→ navigator context null: ${_navigatorKey.currentContext == null}');
+      
+      if (!mounted) {
+        debugPrint('→ not mounted — returning');
         return;
       }
-
-      if (data.event == AuthChangeEvent.tokenRefreshed || data.event == AuthChangeEvent.signedIn) {
-        /* If it is (signin event) -> (New usr) or (tokenrefreshed event) -> (old user agin open the app / old user ID is used from the storage ) then */
-
-        if (data.session == null) return;
-        setState(() {}); // ← update UI immediately (avatar appears now)
+      
+      try {
+        debugPrint('→ calling pullTasksFromSupabase...');
+        await _repository.pullTasksFromSupabase();
+        debugPrint('→ pullTasksFromSupabase completed ✅');
         
-        Future.delayed(Duration.zero, () async {
-          if (!mounted) return;
-          _taskview.currentState?.listenRealtime(); // ← start the websocket
-
-          if (!(await _repository.guesttask())) { // Check they is any guest task are in sembast if not (no guest task) run this
-            ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar( // show snackbar at bottom
-              SnackBar(
-                duration: Duration(minutes: 1),// For max of 1 minute
-                backgroundColor: Color.fromARGB(255, 22, 27, 34),
-                content: Row(
-                  children: [
-                    CircularProgressIndicator(color: Color(0xFF00FF00)),
-                    SizedBox(width: 20),
-                    Text("Syncing tasks...", style: TextStyle(color: Colors.white54)),
-                  ],
-                ),
-              ),
-            );
-            await _repository.pullTasksFromSupabase(); // Call this function
-            ScaffoldMessenger.of(_navigatorKey.currentContext!).hideCurrentSnackBar(); // hide snackbar after done
-            await _taskview.currentState?.taskdata(); // refresh the UI 
-            return; // To stop the code after this no line will execute
-          }
-
-          await showDialog( // This will show when they is a guest task
-            context: _navigatorKey.currentContext!,
-            builder: (context) => Dialog(
-              backgroundColor: Color.fromARGB(255, 13, 17, 23),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-                side: BorderSide(color: Colors.white),
-              ),
-              child: SizedBox(height: MediaQuery.of(context).size.height < 450 ? 350 : 400, width: MediaQuery.of(context).size.width < 450 ? double.infinity : 400, child: Syncscreen()), // Call this syncscreen() class to get the user opinion to sync or not the guest task
-            ),
-          );
-          await _taskview.currentState?.taskdata(); // refresh tasks after sync
-        });
-      }
-
-      if (data.event == AuthChangeEvent.signedOut) { // Trigger when the user logout
-        Future.delayed(Duration(milliseconds: 500), () {
-          if (!mounted) return;
-          setState(() {}); // this was already immediate, should be fine
-          _taskview.currentState?.taskdata();
-        });
+        debugPrint('→ calling taskdata...');
+        await _taskview.currentState?.taskdata();
+        debugPrint('→ taskdata completed ✅');
+        
+        debugPrint('→ calling listenRealtime...');
+        _taskview.currentState?.listenRealtime();
+        debugPrint('→ listenRealtime started ✅');
+        
+      } catch (e, stackTrace) {
+        debugPrint('→ ERROR: $e');
+        debugPrint('→ STACKTRACE: $stackTrace');
       }
     });
+    return;
+  }
+
+  if (data.event == AuthChangeEvent.tokenRefreshed || 
+      data.event == AuthChangeEvent.signedIn) {
+    debugPrint('→ signedIn/tokenRefreshed branch entered');
+    
+    if (data.session == null) {
+      debugPrint('→ session null — returning');
+      return;
+    }
+    
+    setState(() {});
+    
+    Future.delayed(Duration.zero, () async {
+      debugPrint('→ signedIn Future.delayed fired');
+      debugPrint('→ navigator context null: ${_navigatorKey.currentContext == null}');
+      debugPrint('→ taskview state null: ${_taskview.currentState == null}');
+      
+      if (!mounted) {
+        debugPrint('→ not mounted — returning');
+        return;
+      }
+      
+      _taskview.currentState?.listenRealtime();
+      debugPrint('→ listenRealtime called');
+
+      try {
+        final hasGuestTask = await _repository.guesttask();
+        debugPrint('→ hasGuestTask: $hasGuestTask');
+        
+        if (!hasGuestTask) {
+          debugPrint('→ no guest tasks — showing snackbar + pulling');
+          
+          debugPrint('→ navigator context null before snackbar: ${_navigatorKey.currentContext == null}');
+          
+          ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
+            SnackBar(
+              duration: Duration(minutes: 1),
+              backgroundColor: Color.fromARGB(255, 22, 27, 34),
+              content: Row(
+                children: [
+                  CircularProgressIndicator(color: Color(0xFF00FF00)),
+                  SizedBox(width: 20),
+                  Text("Syncing tasks...", style: TextStyle(color: Colors.white54)),
+                ],
+              ),
+            ),
+          );
+          
+          await _repository.pullTasksFromSupabase();
+          debugPrint('→ pull completed ✅');
+          
+          ScaffoldMessenger.of(_navigatorKey.currentContext!).hideCurrentSnackBar();
+          await _taskview.currentState?.taskdata();
+          debugPrint('→ taskdata completed ✅');
+          return;
+        }
+        
+        debugPrint('→ guest tasks exist — showing sync dialog');
+        debugPrint('→ navigator context null before dialog: ${_navigatorKey.currentContext == null}');
+        
+        await showDialog(
+          context: _navigatorKey.currentContext!,
+          builder: (context) => Dialog(
+            backgroundColor: Color.fromARGB(255, 13, 17, 23),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+              side: BorderSide(color: Colors.white),
+            ),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height < 450 ? 350 : 400,
+              width: MediaQuery.of(context).size.width < 450 ? double.infinity : 400,
+              child: Syncscreen(),
+            ),
+          ),
+        );
+        
+        await _taskview.currentState?.taskdata();
+        debugPrint('→ taskdata after dialog completed ✅');
+        
+      } catch (e, stackTrace) {
+        debugPrint('→ ERROR in signedIn block: $e');
+        debugPrint('→ STACKTRACE: $stackTrace');
+      }
+    });
+  }
+
+  if (data.event == AuthChangeEvent.signedOut) {
+    debugPrint('→ signedOut branch entered');
+    Future.delayed(Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      setState(() {});
+      _taskview.currentState?.taskdata();
+      debugPrint('→ signedOut taskdata called ✅');
+    });
+  }
+});
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) async {
       if (result != ConnectivityResult.none && isLoggedIn) { // get the status of the internet if internet is connected and user logged in
         _repository.syncPendingTasks();
