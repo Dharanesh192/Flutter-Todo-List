@@ -264,6 +264,7 @@ class _Homepagestate extends State<Homepage> {
                             onPressed: () {
                               keyword = '';
                               inputdata.clear();
+                              _taskview.currentState?.taskdata;
                               setState(() {});
                             }
                           ) : null,
