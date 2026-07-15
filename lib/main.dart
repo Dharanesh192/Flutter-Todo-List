@@ -264,7 +264,7 @@ class _Homepagestate extends State<Homepage> {
                             onPressed: () {
                               keyword = '';
                               inputdata.clear();
-                              _taskview.currentState?.taskdata;
+                               _taskview.currentState?.filter(activeFilter ?? 'All', keyword ?? '', iscategory);
                               setState(() {});
                             }
                           ) : null,
