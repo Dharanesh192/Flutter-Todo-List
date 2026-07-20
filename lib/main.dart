@@ -7,6 +7,7 @@ import 'Screen/add_task.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:to_do_list/service/push_interop.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,21 +89,16 @@ class _Homepagestate extends State<Homepage> {
   @override
   void initState() {
     super.initState(); // This function will be start first at main.dart file call
-    debugPrint("The initstate is running ☑️");
     _authSubscription = _supabase.auth.onAuthStateChange.listen((data) async { // Get the auth state details that cantains only (event and session) in JSON 
-    debugPrint("The user ID -> ${data.session?.user.id}");
     
       if(data.event == AuthChangeEvent.initialSession){
-        debugPrint("The event is trigger in initialsession");
         if(data.session == null){
-          debugPrint("The data.session is empty");
           return;
           }
 
         Future.delayed(Duration(milliseconds: 300), () async{
           if(!mounted) return;
           await _repository.pullTasksFromSupabase();
-          debugPrint('The pull task function is triggered');
           await _taskview.currentState?.taskdata();
           _taskview.currentState?.listenRealtime();
           _repository.syncPendingTasks();
@@ -119,6 +115,7 @@ class _Homepagestate extends State<Homepage> {
         Future.delayed(Duration.zero, () async {
           if (!mounted) return;
           _taskview.currentState?.listenRealtime(); // ← start the websocket
+          await triggerPushSubscription();
 
           if (!(await _repository.guesttask())) { // Check they is any guest task are in sembast if not (no guest task) run this
             ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar( // show snackbar at bottom
