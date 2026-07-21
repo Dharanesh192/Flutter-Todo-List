@@ -115,7 +115,9 @@ class _Homepagestate extends State<Homepage> {
         Future.delayed(Duration.zero, () async {
           if (!mounted) return;
           _taskview.currentState?.listenRealtime(); // ← start the websocket
+          debugPrint("🔔 About to call triggerPushSubscription");
           await triggerPushSubscription();
+          debugPrint("🔔 triggerPushSubscription call finished");
 
           if (!(await _repository.guesttask())) { // Check they is any guest task are in sembast if not (no guest task) run this
             ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar( // show snackbar at bottom
