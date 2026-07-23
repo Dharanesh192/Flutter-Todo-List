@@ -11,9 +11,9 @@ const supabase = createClient(
 );
 
 const CHECKPOINTS = [
-  { hoursBefore: 168, column: 'notified_7d', label: '7 days' },
-  { hoursBefore: 72,  column: 'notified_3d', label: '3 days' },
-  { hoursBefore: 24,  column: 'notified_1d', label: '1 day' },
+  { daysBefore: 7, column: 'notified_7d', label: '7 days' },
+  { daysBefore: 3,  column: 'notified_3d', label: '3 days' },
+  { daysBefore: 1,  column: 'notified_1d', label: '1 day' },
 ];
 
 async function sendOneSignalPush(userId: string, title: string, body: string) {
@@ -34,13 +34,21 @@ async function sendOneSignalPush(userId: string, title: string, body: string) {
   return response.json();
 }
 
+function getDateStringDaysFromNow(daysFromNow: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromNow);
+  return date.toISOString().split('T')[0]; // e.g. "2026-07-26"
+}
+
 Deno.serve(async () => {
   const now = new Date();
   let totalSent = 0;
 
   for (const checkpoint of CHECKPOINTS) {
-    const windowStart = new Date(now.getTime() + (checkpoint.hoursBefore - 1) * 60 * 60 * 1000);
-    const windowEnd = new Date(now.getTime() + checkpoint.hoursBefore * 60 * 60 * 1000);
+    
+    const targetDateString = getDateStringDaysFromNow(checkpoint.daysBefore);
+    const windowStart = `${targetDateString}T00:00:00`;
+    const windowEnd = `${targetDateString}T23:59:59`;
 
     const { data: tasks, error } = await supabase
       .from('focus_hub')
@@ -49,6 +57,11 @@ Deno.serve(async () => {
       .eq(checkpoint.column, false)
       .gte('Deadline', windowStart.toISOString())
       .lt('Deadline', windowEnd.toISOString());
+
+    if (error) {
+      console.error(`Error fetching tasks for ${checkpoint.label}:`, error);
+      continue;
+    }
 
     if (error || !tasks || tasks.length === 0) continue;
 
