@@ -37,6 +37,23 @@
 
   <title>Focus-hub</title>
   <link rel="manifest" href="manifest.json">
+
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "e4b9478a-a859-43b1-be2e-f029b38e9865",
+    });
+  });
+
+  async function setOneSignalExternalId(userId) {
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.login(userId); // ties this browser subscription to your Supabase user ID
+  });}
+</script>
+
 </head>
 <body style = "background-color: #0D1117;">
   <a href="/privacy.html" 
@@ -55,70 +72,6 @@
     }
   </script>
 
-  <script>
-  const VAPID_PUBLIC_KEY = 'BLz6bYlyhuA13ajUlvH5z93b5-S_sHmwJPKKK5iNGrLjy9xRoIAZUyDIJBFS4hYiDXGdB_-HHkyJosty0IAK7f8';
-  const SUPABASE_URL = 'https://zdmiohkywkyfajfmbhyp.supabase.co';
-
-  // Converts the VAPID key from base64 string to the byte array format the browser API expects
-  function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-  }
-
-  // Call this function from Flutter (via JS interop) after user logs in
-  async function subscribeToPush() {
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        console.log('[Push] Permission denied');
-        return;
-      }
-
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-      });
-
-      // Get the current Supabase auth token to authenticate this request
-      const authToken = window.localStorage.getItem('sb-zdmiohkywkyfajfmbhyp-auth-token');
-      const parsedToken = authToken ? JSON.parse(authToken) : null;
-      const accessToken = parsedToken?.access_token;
-
-      if (!accessToken) {
-        console.log('[Push] No auth token found, user must be logged in');
-        return;
-      }
-
-      // Send subscription details to your save-subscription Edge Function
-      const subJson = subscription.toJSON();
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/save-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          endpoint: subJson.endpoint,
-          keys: subJson.keys,
-        }),
-      });
-
-      const result = await response.json();
-      console.log('[Push] Subscription saved:', result);
-
-    } catch (err) {
-      console.error('[Push] Subscription failed:', err);
-    }
-  }
-</script>
-  
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
