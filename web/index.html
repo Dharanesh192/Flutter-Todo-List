@@ -47,6 +47,13 @@
     });
   });
 
+  async function showNotificationPrompt() {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.Slidedown.promptPush();
+    });
+  }
+
   async function setOneSignalExternalId(userId) {
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
