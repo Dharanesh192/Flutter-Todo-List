@@ -38,29 +38,6 @@
   <title>Focus-hub</title>
   <link rel="manifest" href="manifest.json">
 
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "e4b9478a-a859-43b1-be2e-f029b38e9865",
-    });
-  });
-
-  async function showNotificationPrompt() {
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.Slidedown.promptPush();
-    });
-  }
-
-  async function setOneSignalExternalId(userId) {
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.login(userId); // ties this browser subscription to your Supabase user ID
-  });}
-</script>
-
 </head>
 <body style = "background-color: #0D1117;">
   <a href="/privacy.html" 

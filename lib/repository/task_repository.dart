@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart'; // Used to check the platform (web or 
 import 'package:supabase_flutter/supabase_flutter.dart'; // To use the features of Supabase
 import 'package:uuid/uuid.dart'; // To generate unique ID
 import 'package:to_do_list/models/task_model.dart'; // File path to the task model to convert the list data into the map data
+import 'package:collection/collection.dart';
 
 /* Here all the function are declear with the (Future) Keyword why? 
 The answer is that here all the function need to run in backend and take time to complete. So we use (Future) to tell the flutter that this function take time so dont wait for this to complete and move to the next step.
@@ -144,7 +145,7 @@ class TaskRepository
   Future<List<TaskModel>> getAllTasks() async {
   final db = await dbcreation;
 
-  final finder = Finder(sortOrders: 
+  final condition = Finder(sortOrders: 
     [
       SortOrder('isComplete',true), // -> sort by isComplete in ascending order (false first then true).
       SortOrder('createdAt',false),
@@ -155,8 +156,8 @@ class TaskRepository
     SortOrder(field_name, ascending)
     Field_name -> can be any field in the TaskModel 
     Ascending -> It is a binary value:[true for ascending], [false for descending] */
-    final records = await _table.find(db, finder: finder); // -> FInd the record as per the given finder condition in database and store it in the [records variable]
-    return records.map((r) => TaskModel.fromMap(r.value)).toList(); // The [records] contain omly key value pair so we need to convert it into the taskModel object
+    final records = await _table.find(db, finder: condition); // -> FInd the record as per the given finder condition in database and store it in the [records variable]
+    return records.map((r) => TaskModel.fromMap(r.value)).toList(); // The [records] contain key value pair and (all the values we want are stored in the value not in the key only store the task ID so we need to convert the value)into the taskModel object
     /*      |      |    |           |             |         |
            \|/    \|/  \|/         \|/           \|/       \|/
         Contain   It's  This       The function to call    Convert the result 
@@ -172,29 +173,46 @@ class TaskRepository
   Future<void> pullTasksFromSupabase() async {
     if (_supabase.auth.currentUser == null) return;
     try { // ← wrap everything
-      final db = await dbcreation;
-      final response = await _supabase.from('focus_hub').select().eq('User_id', _supabase.auth.currentUser!.id);
-      for (var row in response) {
-        try { // ← per row try-catch
-          final existingRecord = await _table.record(row['Task_id']).get(db);
-          final task = TaskModel.fromSupabaseMap(row);
-          if (existingRecord != null) {
-            final localTask = TaskModel.fromMap(existingRecord);
-            if (task.updatedAt.isAfter(localTask.updatedAt)) {
-              await _table.record(task.taskId).put(db, task.toMap());
+      final db = await dbcreation; // Checking the database connection
+
+      final findcondition = Finder(filter: Filter.notNull('userId')); // condition to get every task with used ID
+      final localtask = await _table.find(db, finder : findcondition); // store all the local task
+      final local = localtask.map((r) => TaskModel.fromMap(r.value)).toList(); // Convert it into dart object then list
+
+      final response = await _supabase.from('focus_hub').select().eq('User_id', _supabase.auth.currentUser!.id); // geting all the records from the supabase
+      final supabase = response.map((r) => TaskModel.fromSupabaseMap(r)).toList(); // Convert it into dart object then list
+
+      
+      for (var row in local) { // Iterate with every task in local
+        try {
+          final onetask = supabase.firstWhereOrNull((task) => task.taskId == row.taskId); // Find the task in the supabase which is currently in loop
+          if (onetask != null){ // if find the task
+            if (onetask.updatedAt.isAfter(row.updatedAt)){ // Then check the task in both are updated in same date or the task in supabase updated after the local task
+              await _table.record(onetask.taskId).put(db, onetask.toMap()); // Then update the local task
             }
-          } 
-          else {
-            await _table.record(task.taskId).put(db, task.toMap());
+          }
+          else{ // If not in the supabase delete it
+            deleteTask(row.taskId);
           }
         } catch (e) {
           debugPrint('row parse failed: $e → row: $row'); // ← see which row fails
         }
       }
+
+      for (var row in supabase){ // Iterate with every task in supabase
+        try{
+          final onetask = local.firstWhereOrNull((task) => task.taskId == row.taskId); // Find the task in the supabase which is currently in loop
+          if(onetask == null){ // if the task is not the local database then add it
+            await _table.record(row.taskId).put(db, row.toMap());
+          }
+        } catch(e) {
+          debugPrint('row parse failed: $e → row: $row'); // ← see which row fails
+        }
+      }
+
     } catch (e) {
       debugPrint('pull failed: $e');
     }
- 
   }
 
   // Get the guset task
