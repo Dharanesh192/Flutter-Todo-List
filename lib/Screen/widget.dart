@@ -463,3 +463,75 @@ class AppSnackbar {
       );
   }
 }
+
+void showLocalSnackbar(
+  BuildContext context, {
+  required String message,
+  required SnackbarType type,
+  Duration duration = const Duration(seconds: 4),
+}) {
+  Color accent = const Color(0xFFFF4D4F);
+  IconData icon = Icons.error_outline_rounded;
+
+  switch (type) {
+    case SnackbarType.success:
+      accent = const Color(0xFF00FF38);
+      icon = Icons.check_circle_outline_rounded;
+      break;
+    case SnackbarType.warning:
+      accent = const Color(0xFFFFC107);
+      icon = Icons.warning_amber_rounded;
+      break;
+    case SnackbarType.info:
+      accent = const Color(0xFF3B82F6);
+      icon = Icons.info_outline_rounded;
+      break;
+    case SnackbarType.error:
+      accent = const Color(0xFFFF4D4F);
+      icon = Icons.error_outline_rounded;
+      break;
+  }
+
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        duration: duration,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+        content: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF22252B),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: accent, width: 1.3),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withOpacity(.25),
+                blurRadius: 18,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: accent, size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+}

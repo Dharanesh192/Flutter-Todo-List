@@ -23,7 +23,8 @@ class _AddtaskState extends State<Addtask> {
 
   Future<void> _addTask() async {
   if (task.text.isEmpty) {
-    AppSnackbar.show(
+    showLocalSnackbar(
+      context,
       message: 'Task name cannot be empty 😅',
       type: SnackbarType.warning,
     );
@@ -43,7 +44,8 @@ class _AddtaskState extends State<Addtask> {
     await _repository.addTask(newTask);
     if (mounted) Navigator.pop(context, true);
   } catch (e) {
-    AppSnackbar.show(
+    showLocalSnackbar(
+      context,
       message: 'Error 🤔: $e',
       type: SnackbarType.error,
     );

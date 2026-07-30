@@ -70,7 +70,8 @@ class _EdittaskState extends State<Edittask> {
   Future<void> _editTask() async {
 
       if (edittask.text.isEmpty) {
-        AppSnackbar.show(
+        showLocalSnackbar(
+          context,
           message: 'Task name cannot be empty 😅',
           type: SnackbarType.warning,
         );
@@ -93,7 +94,8 @@ class _EdittaskState extends State<Edittask> {
   if (mounted) Navigator.pop(context, true);
   }
   catch (e){
-   AppSnackbar.show(
+   showLocalSnackbar(
+      context,
       message: 'Error 🤔: $e',
       type: SnackbarType.error,
     );
