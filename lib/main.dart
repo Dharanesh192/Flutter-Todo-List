@@ -8,6 +8,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
@@ -180,6 +182,7 @@ class _Homepagestate extends State<Homepage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: _navigatorKey,
+      scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(

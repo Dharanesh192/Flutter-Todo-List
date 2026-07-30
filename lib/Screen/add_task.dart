@@ -23,8 +23,9 @@ class _AddtaskState extends State<Addtask> {
 
   Future<void> _addTask() async {
   if (task.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Task name cannot be empty!',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+    AppSnackbar.show(
+      message: 'Task name cannot be empty 😅',
+      type: SnackbarType.warning,
     );
     return;
   }
@@ -42,8 +43,10 @@ class _AddtaskState extends State<Addtask> {
     await _repository.addTask(newTask);
     if (mounted) Navigator.pop(context, true);
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Error: $e")),);
+    AppSnackbar.show(
+      message: 'Error 🤔: $e',
+      type: SnackbarType.error,
+    );
   }
   finally {
   if (mounted) setState(() => _isLoading = false); // ← always runs ✅

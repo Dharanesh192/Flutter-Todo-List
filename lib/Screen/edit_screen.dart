@@ -70,9 +70,10 @@ class _EdittaskState extends State<Edittask> {
   Future<void> _editTask() async {
 
       if (edittask.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Task name cannot be empty!',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
-    );
+        AppSnackbar.show(
+          message: 'Task name cannot be empty 😅',
+          type: SnackbarType.warning,
+        );
     return;
   }
 
@@ -92,8 +93,10 @@ class _EdittaskState extends State<Edittask> {
   if (mounted) Navigator.pop(context, true);
   }
   catch (e){
-    ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text("Update failed")),);
+   AppSnackbar.show(
+      message: 'Error 🤔: $e',
+      type: SnackbarType.error,
+    );
   }
   finally{
     setState(() => _isLoading = false);

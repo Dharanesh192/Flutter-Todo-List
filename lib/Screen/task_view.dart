@@ -481,7 +481,10 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                                         setState(() {
                                           filtertask.insert(index, removedtask); // Revert the UI change if deletion fails
                                         });
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete task. Please try again.')));
+                                          AppSnackbar.show(
+                                            message: 'Could not delete task.',
+                                            type: SnackbarType.error,
+                                          );                                      
                                       }
                                     }
                                   },
