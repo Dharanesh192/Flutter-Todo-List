@@ -392,8 +392,8 @@ class AppSnackbar {
     required String message,
     SnackbarType type = SnackbarType.error,
     Duration duration = const Duration(seconds: 4),
-    Color accent = const const Color(0xFFFF4D4F);
-    IconData icon = Icons.error_outline_rounded;
+    Color accent = const Color(0xFFFF4D4F),
+    IconData icon = Icons.error_outline_rounded,
   }) {
     Color accent;
     IconData icon;
