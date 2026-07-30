@@ -3,6 +3,9 @@ import 'package:to_do_list/main.dart'; // import scaffoldMessengerKey
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:to_do_list/repository/task_repository.dart';
+
+enum SnackbarType { success, warning, info, error}
+
 class Textstyler extends StatelessWidget {
 
   final TextEditingController controller;
@@ -389,6 +392,8 @@ class AppSnackbar {
     required String message,
     SnackbarType type = SnackbarType.error,
     Duration duration = const Duration(seconds: 4),
+    Color accent = const const Color(0xFFFF4D4F);
+    IconData icon = Icons.error_outline_rounded;
   }) {
     Color accent;
     IconData icon;
