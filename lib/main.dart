@@ -395,6 +395,7 @@ class _Homepagestate extends State<Homepage> {
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
                 builder: (context) => Center(
+                  child: ScaffoldMessenger(
                   child: Container(
                     clipBehavior: Clip.hardEdge, // it prevents the content from Addtask is overflowing outside the container when the keyboard appears
                     decoration: BoxDecoration(color: Color.fromARGB(255, 13, 17, 23), borderRadius: BorderRadius.circular(15)),
@@ -402,6 +403,7 @@ class _Homepagestate extends State<Homepage> {
                     height: (MediaQuery.of(context).size.height * 0.6).clamp(420, 475),
                     child: const Addtask(),
                   ),
+                 ),
                 ),
               );
               // ✅ if statement trigger after task added
