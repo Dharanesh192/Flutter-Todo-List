@@ -387,88 +387,11 @@ class SyncscreenState extends State<Syncscreen> {
   }
 }
 
-class AppSnackbar {
-  static void show({                    // ← no BuildContext needed anymore
-    required String message,
-    SnackbarType type = SnackbarType.error,
-    Duration duration = const Duration(seconds: 4),
-    Color accent = const Color(0xFFFF4D4F),
-    IconData icon = Icons.error_outline_rounded,
-  }) {
-    Color accent;
-    IconData icon;
-    switch (type) {
-      case SnackbarType.success:
-        accent = const Color(0xFF00FF38);
-        icon = Icons.check_circle_outline_rounded;
-        break;
-      case SnackbarType.warning:
-        accent = const Color(0xFFFFC107);
-        icon = Icons.warning_amber_rounded;
-        break;
-      case SnackbarType.info:
-        accent = const Color(0xFF3B82F6);
-        icon = Icons.info_outline_rounded;
-        break;
-      case SnackbarType.error:
-        accent = const Color(0xFFFF4D4F);
-        icon = Icons.error_outline_rounded;
-        break;
-    }
-
-    // Use global key — always hits root ScaffoldMessenger
-    // No matter where you call this from (modal, dialog, nested widget)
-    // it always shows ONE snackbar at the root level
-    scaffoldMessengerKey.currentState
-      ?..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          duration: duration,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20,),
-          content: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14,),
-            decoration: BoxDecoration(
-              color: const Color(0xFF22252B),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: accent, width: 1.3,),
-              boxShadow: [
-                BoxShadow(
-                  color: accent.withOpacity(.25),
-                  blurRadius: 18,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: accent, size: 22),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    message,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-  }
-}
-
 void showLocalSnackbar(
   BuildContext context, {
   required String message,
   required SnackbarType type,
-  Duration duration = const Duration(seconds: 4),
+  Duration duration = const Duration(seconds: 3),
 }) {
   Color accent = const Color(0xFFFF4D4F);
   IconData icon = Icons.error_outline_rounded;

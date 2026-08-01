@@ -455,12 +455,14 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                                         isScrollControlled: true,
                                         backgroundColor: Colors.transparent,
                                         builder: (context) => Center(
+                                          child: ScaffoldMessenger(
                                           child: Container(
                                             clipBehavior: Clip.hardEdge, // it prevents the content from Addtask is overflowing outside the container when the keyboard appears
                                             decoration: BoxDecoration(color: Color.fromARGB(255, 13, 17, 23), borderRadius: BorderRadius.circular(15)),
                                             width: (MediaQuery.of(context).size.width * 0.75).clamp(100, 475),
                                             height: (MediaQuery.of(context).size.height * 0.6).clamp(420, 475),
                                             child: Edittask(currenttask: filtertask[index].taskName, currentpriority: filtertask[index].priority, currentcategory: filtertask[index].category, currentdeadline: filtertask[index].deadline, created: filtertask[index].createdAt, taskId: filtertask[index].taskId, completion: filtertask[index].isComplete),
+                                            ),
                                           ),
                                         ),
                                       );
@@ -498,7 +500,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                   ),
                 ),
               ]
-            )       
-    );
-  }
-}
+            )
+          );
+        }
+      }
