@@ -487,7 +487,7 @@ class TaskviewState extends State<Taskview> with WidgetsBindingObserver {
                                             context,
                                             message: 'Error : Can\'t delete the task 🧐',
                                             type: SnackbarType.warning,
-                                          )                                  
+                                          );
                                         }
                                       }
                                     },

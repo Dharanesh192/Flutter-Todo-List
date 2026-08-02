@@ -136,7 +136,7 @@ class _LogscreenState extends State<Logscreen> {
         redirectTo: kIsWeb ? '${Uri.base.origin}/' : 'io.supabase.focushub://login-callback');  
     }
      catch (e) {
-        ShowLocalSnackbar(
+        showLocalSnackbar(
           context,
           message: 'Login failed. Try again later 😑',
           type: SnackbarType.error,
@@ -156,7 +156,7 @@ class _LogscreenState extends State<Logscreen> {
       if (mounted) Navigator.pop(context);
     } 
     catch (e) {
-        Showlocalsnackbar(
+        showLocalSnackbar(
           context,
           message: 'Logout failed. I itself don\'t know why 🤔',
           type: SnackbarType.error,
@@ -179,7 +179,7 @@ class _LogscreenState extends State<Logscreen> {
       Navigator.pop(context);
     }
     catch (e) {
-        Showlocalsnackbar(
+        showLocalSnackbar(
           context,
           message: 'Mission failed: Something went wrong 🤫',
           type: SnackbarType.error,
@@ -308,7 +308,7 @@ class SyncscreenState extends State<Syncscreen> {
       if(mounted) Navigator.pop(context);
     }
     catch (e) {
-        Showlocalsnackbar(
+        showLocalSnackbar(
           context,
           message: 'Mission failed: Sync task failed 🫡',
           type: SnackbarType.error,
