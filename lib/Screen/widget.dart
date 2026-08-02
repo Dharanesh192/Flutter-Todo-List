@@ -135,11 +135,13 @@ class _LogscreenState extends State<Logscreen> {
         redirectTo: kIsWeb ? '${Uri.base.origin}/' : 'io.supabase.focushub://login-callback');  
     }
      catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
+      if (mounted) Navigator.pop(context);
+        ShowLocalSnackbar(
+          context,
+          message: 'Login failed. Try again later 😑',
+          type: SnackbarType.error,
         );
-      }
+      debugPrint("Error in login : $e")
     } finally {
       setState(() => _isLoading = false);
     }
@@ -154,11 +156,13 @@ class _LogscreenState extends State<Logscreen> {
       if (mounted) Navigator.pop(context);
     } 
     catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Logout failed: $e')),
-        );
-      }
+      if (mounted) Navigator.pop(context);
+        Showlocalsnackbar(
+          context,
+          message: 'Logout failed. I itself don\'t know why 🤔',
+          type: SnackbarType.error,
+        )
+      debugPrint("Error in logout : $e")
     } 
     finally {
       setState(() => _isLoading = false);
@@ -176,11 +180,13 @@ class _LogscreenState extends State<Logscreen> {
       Navigator.pop(context);
     }
     catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sync task failed: $e')),
+      if (mounted) Navigator.pop(context);
+        Showlocalsnackbar(
+          context,
+          message: 'Mission failed: Something went wrong 🤫',
+          type: SnackbarType.error,
         );
-      }
+      debugPrint("Error in sync and logout : $e")
     }
     finally {
       setState(() => _isLoading = false);
@@ -304,11 +310,14 @@ class SyncscreenState extends State<Syncscreen> {
       if(mounted) Navigator.pop(context);
     }
     catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sync task failed: $e')),
+      if(mounted) Navigator.pop(context);
+        Showlocalsnackbar(
+          context,
+          message: 'Mission failed: Sync task failed 🫡',
+          type: SnackbarType.error,
         );
-      }
+      
+      debugPrint("Error in sync and logout : $e")
     }
     finally {
       setState(() => _isLoading = false);
@@ -457,4 +466,4 @@ void showLocalSnackbar(
         ),
       ),
     );
-}
+  }
