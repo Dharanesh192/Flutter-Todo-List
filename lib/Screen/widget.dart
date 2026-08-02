@@ -465,57 +465,52 @@ void showLocalSnackbar(
     );
   }
 
-class LoadingDialog extends StatelessWidget {
+cclass LoadingDialog extends StatelessWidget {
   final String message;
   const LoadingDialog({required this.message, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 220,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 22, 27, 34),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white24),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-
-            // Spinkit hourglass animation
-            const SpinKitHourGlass(
-              color: Color(0xFF00FF00),
-              size: 80.0,
-            ),
-
-            const SizedBox(height: 24),
-
-            // Focus Hub title
-            const Text(
-              'Focus Hub',
-              style: TextStyle(
-                fontFamily: 'Teko',
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+    return Dialog(                          // ← ADD Dialog wrapper
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: Center(
+        child: Container(
+          width: 220,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 22, 27, 34),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SpinKitHourGlass(
                 color: Color(0xFF00FF00),
+                size: 80.0,
               ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Dynamic message passed in
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 14,
+              const SizedBox(height: 24),
+              const Text(
+                'Focus Hub',
+                style: TextStyle(
+                  fontFamily: 'Teko',
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF00FF00),
+                ),
               ),
-            ),
-
-          ],
+              const SizedBox(height: 8),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
