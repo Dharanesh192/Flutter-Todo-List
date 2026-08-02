@@ -117,36 +117,38 @@ class _Homepagestate extends State<Homepage> {
           if (!mounted) return;
           _taskview.currentState?.listenRealtime(); // ← start the websocket
 
-          if (!(await _repository.guesttask())) { // Check they is any guest task are in sembast if not (no guest task) run this
-            ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar( // show snackbar at bottom
-              SnackBar(
-                duration: Duration(minutes: 1),// For max of 1 minute
-                backgroundColor: Color.fromARGB(255, 22, 27, 34),
-                content: Row(
-                  children: [
-                    CircularProgressIndicator(color: Color(0xFF00FF00)),
-                    SizedBox(width: 20),
-                    Text("Syncing tasks...", style: TextStyle(color: Colors.white54)),
-                  ],
-                ),
-              ),
-            );
-            await _repository.pullTasksFromSupabase(); // Call this function
-            ScaffoldMessenger.of(_navigatorKey.currentContext!).hideCurrentSnackBar(); // hide snackbar after done
-            await _taskview.currentState?.taskdata(); // refresh the UI 
-            return; // To stop the code after this no line will execute
+          if (!(await _repository.guesttask())) {
+            bool load = false; // To track the loading dialog state
+            if (!load) { // Show the loading dialog only if it's not already open
+              load = true; // Change the value to close the window in next call
+              showDialog(
+                context: _navigatorKey.currentContext!,
+                barrierDismissible: false,  // user can't tap outside to close
+                builder: (_) => const LoadingDialog(message: 'Syncing tasks...'),
+              );
+            }
+
+            await _repository.pullTasksFromSupabase(); // Do the actual works getting all the tasks and show them
+            await _taskview.currentState?.taskdata();
+
+            if (load && _navigatorKey.currentContext!.mounted) { // Pop the loading window and reset the value
+              Navigator.of(_navigatorKey.currentContext!).pop();
+              load = false;
+            }
+            return;
           }
 
           await showDialog( // This will show when they is a guest task
             context: _navigatorKey.currentContext!,
-            builder: (context) => Dialog(
+            builder: (context) => ScaffoldMessenger(
+            child : Dialog(
               backgroundColor: Color.fromARGB(255, 13, 17, 23),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
                 side: BorderSide(color: Colors.white),
               ),
               child: SizedBox(height: MediaQuery.of(context).size.height < 450 ? 350 : 400, width: MediaQuery.of(context).size.width < 450 ? double.infinity : 400, child: Syncscreen()), // Call this syncscreen() class to get the user opinion to sync or not the guest task
-            ),
+            ),),
           );
           await _taskview.currentState?.taskdata(); // refresh tasks after sync
         });
@@ -202,11 +204,11 @@ class _Homepagestate extends State<Homepage> {
               builder: (context) => Padding(
                 padding: EdgeInsets.only(right: 20),
                 child: GestureDetector(
-                  onTap:
-                      () => // use isloggedIn to determine whether to show the sign out dialog or the sign in dialog
+                    onTap: () => // use isloggedIn to determine whether to show the sign out dialog or the sign in dialog
                       showDialog(
                         context: context,
-                        builder: (context) => Dialog(
+                        builder: (context) => ScaffoldMessenger(
+                          child : Dialog(
                           backgroundColor: Color.fromARGB(255, 13, 17, 23),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -216,6 +218,7 @@ class _Homepagestate extends State<Homepage> {
                             height: MediaQuery.of(context).size.height < 450 ? 350 : 400,
                             width: MediaQuery.of(context).size.width < 450 ? double.infinity : 400,
                             child: isLoggedIn ? Logscreen(textword: "Sign out", method: false) : Logscreen(textword: "Continue with Google", method: true), // use isloggedIn to determine whether to show sign in or sign out
+                            ),
                           ),
                         ),
                       ),

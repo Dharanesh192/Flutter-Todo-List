@@ -3,6 +3,7 @@ import 'package:to_do_list/main.dart'; // import scaffoldMessengerKey
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:to_do_list/repository/task_repository.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart'; // ← add at top of widget.dart
 
 enum SnackbarType { success, warning, info, error}
 
@@ -135,13 +136,12 @@ class _LogscreenState extends State<Logscreen> {
         redirectTo: kIsWeb ? '${Uri.base.origin}/' : 'io.supabase.focushub://login-callback');  
     }
      catch (e) {
-      if (mounted) Navigator.pop(context);
         ShowLocalSnackbar(
           context,
           message: 'Login failed. Try again later 😑',
           type: SnackbarType.error,
         );
-      debugPrint("Error in login : $e")
+      debugPrint("Error in login : $e");
     } finally {
       setState(() => _isLoading = false);
     }
@@ -156,13 +156,12 @@ class _LogscreenState extends State<Logscreen> {
       if (mounted) Navigator.pop(context);
     } 
     catch (e) {
-      if (mounted) Navigator.pop(context);
         Showlocalsnackbar(
           context,
           message: 'Logout failed. I itself don\'t know why 🤔',
           type: SnackbarType.error,
-        )
-      debugPrint("Error in logout : $e")
+        );
+      debugPrint("Error in logout : $e");
     } 
     finally {
       setState(() => _isLoading = false);
@@ -180,13 +179,12 @@ class _LogscreenState extends State<Logscreen> {
       Navigator.pop(context);
     }
     catch (e) {
-      if (mounted) Navigator.pop(context);
         Showlocalsnackbar(
           context,
           message: 'Mission failed: Something went wrong 🤫',
           type: SnackbarType.error,
         );
-      debugPrint("Error in sync and logout : $e")
+      debugPrint("Error in sync and logout : $e");
     }
     finally {
       setState(() => _isLoading = false);
@@ -310,14 +308,13 @@ class SyncscreenState extends State<Syncscreen> {
       if(mounted) Navigator.pop(context);
     }
     catch (e) {
-      if(mounted) Navigator.pop(context);
         Showlocalsnackbar(
           context,
           message: 'Mission failed: Sync task failed 🫡',
           type: SnackbarType.error,
         );
       
-      debugPrint("Error in sync and logout : $e")
+      debugPrint("Error in sync and logout : $e");
     }
     finally {
       setState(() => _isLoading = false);
@@ -467,3 +464,60 @@ void showLocalSnackbar(
       ),
     );
   }
+
+class LoadingDialog extends StatelessWidget {
+  final String message;
+  const LoadingDialog({required this.message, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 220,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 22, 27, 34),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+
+            // Spinkit hourglass animation
+            const SpinKitPouringHourGlassRefined(
+              color: Color(0xFF00FF00),
+              size: 80.0,
+            ),
+
+            const SizedBox(height: 24),
+
+            // Focus Hub title
+            const Text(
+              'Focus Hub',
+              style: TextStyle(
+                fontFamily: 'Teko',
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00FF00),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Dynamic message passed in
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white54,
+                fontSize: 14,
+              ),
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
+}
