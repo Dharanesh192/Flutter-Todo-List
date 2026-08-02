@@ -485,7 +485,7 @@ class LoadingDialog extends StatelessWidget {
           children: [
 
             // Spinkit hourglass animation
-            const SpinKitPouringHourGlassRefined(
+            const SpinKitHourGlass(
               color: Color(0xFF00FF00),
               size: 80.0,
             ),
