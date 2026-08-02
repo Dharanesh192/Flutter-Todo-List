@@ -465,7 +465,7 @@ void showLocalSnackbar(
     );
   }
 
-cclass LoadingDialog extends StatelessWidget {
+class LoadingDialog extends StatelessWidget {
   final String message;
   const LoadingDialog({required this.message, super.key});
 
