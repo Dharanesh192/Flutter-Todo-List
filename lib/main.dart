@@ -124,7 +124,9 @@ class _Homepagestate extends State<Homepage> {
               showDialog(
                 context: _navigatorKey.currentContext!,
                 barrierDismissible: false,  // user can't tap outside to close
-                builder: (_) => const LoadingDialog(message: 'Syncing tasks...'),
+                builder: (_) => const SelectionContainer.disabled(
+                  child:LoadingDialog(message: 'Syncing tasks...'),
+                ),
               );
             }
 
@@ -135,6 +137,7 @@ class _Homepagestate extends State<Homepage> {
               Navigator.of(_navigatorKey.currentContext!).pop();
               load = false;
             }
+            
             return;
           }
 
