@@ -10,14 +10,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANONKEY');
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
+    url: "https://zdmiohkywkyfajfmbhyp.supabase.co",
+    // ignore: deprecated_member_use
+    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkbWlvaGt5d2t5ZmFqZm1iaHlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzAwMDMsImV4cCI6MjA4OTUwNjAwM30.VntnNex5t-cnTNGmNtcF2M4Stz6URsd9LrnfRIk-qsQ",
   );
   runApp(const Homepage());
 }
